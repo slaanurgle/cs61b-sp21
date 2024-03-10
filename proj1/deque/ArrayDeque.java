@@ -1,6 +1,7 @@
 package deque;
 
-public class ArrayDeque<T> {
+import java.util.Iterator;
+public class ArrayDeque<T> implements Iterable<T>, Deque<T>{
     private int size;
     private int front;
     private int back;
@@ -9,6 +10,8 @@ public class ArrayDeque<T> {
     private int FACTOR = 2;
     private int STARTSIZE = 16;
     private double RATIO = 0.25;
+
+
     public ArrayDeque(){
         size = 0;
         front = 4;
@@ -72,10 +75,6 @@ public class ArrayDeque<T> {
         size += 1;
     }
 
-    public boolean isEmpty() {
-        return size == 0;
-    }
-
     public int size() {
         return size;
     }
@@ -129,5 +128,24 @@ public class ArrayDeque<T> {
         return items[getIndex];
     }
 
+
+    public Iterator<T> iterator() {
+        return new ArrayDequeIterator();
+    }
+
+    public class ArrayDequeIterator implements Iterator<T> {
+        private int wizpos = front;
+        private int cnt = 0;
+        public boolean hasNext() {
+            return cnt < size;
+        }
+
+        public T next() {
+            T returnItem = items[wizpos];
+            wizpos = (wizpos + items.length + 1) % items.length;
+            cnt += 1;
+            return returnItem;
+        }
+    }
 
 }

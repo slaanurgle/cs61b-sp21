@@ -125,4 +125,39 @@ public class LinkedListDequeTest {
         }
 
     }
+
+    @Test
+    public void iterationTest() {
+        LinkedListDeque<Integer> lld1 = new LinkedListDeque<>();
+        for (int i = 0; i < 10; i += 1) {
+            lld1.addLast(i);
+        }
+        int i = 0;
+        for (int item : lld1) {
+            assertEquals(i, item);
+            i += 1;
+        }
+
+    }
+
+    @Test
+    public void emptyIteration() {
+        LinkedListDeque<Integer> lld1 = new LinkedListDeque<>();
+        for (int item : lld1) {
+            System.out.println(item);
+        }
+    }
+    @Test
+    public void getRecursiveTest() {
+        LinkedListDeque<Integer> lld1 = new LinkedListDeque<>();
+        for (int i = 0; i < 10; i += 1) {
+            lld1.addLast(i);
+        }
+        for (int i = 0; i < 10; i += 1) {
+            int getItem = lld1.getRecursive(i);
+            assertEquals(i, getItem);
+        }
+    }
+
+
 }

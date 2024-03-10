@@ -1,6 +1,8 @@
 package deque;
 
-public class LinkedListDeque<T> {
+import java.util.Iterator;
+
+public class LinkedListDeque<T> implements Iterable<T>, Deque<T> {
     private class Node {
         Node prev;
         T item;
@@ -40,10 +42,6 @@ public class LinkedListDeque<T> {
         Node back = new Node(sentinel.prev, item, sentinel);
         sentinel.prev.next = back;
         sentinel.prev = back;
-    }
-
-    public boolean isEmpty() {
-        return size == 0;
     }
 
     public int size() {
@@ -90,15 +88,45 @@ public class LinkedListDeque<T> {
         return p.item;
     }
 
-//    public Iterator<T> iterator() {
-//
-//    }
+    public Iterator<T> iterator() {
+        return new LinkedListDequeIterator();
+    }
 
-//    public boolean equals(Object o) {
-//                return true;
-//    }
+    public class LinkedListDequeIterator implements Iterator<T> {
+        private Node p = sentinel.next;
+        public boolean hasNext() {
+            return (p.next != sentinel);
+        }
 
-    /* Have some problem unsolved */
+        public T next() {
+            T returnItem = p.item;
+            p = p.next;
+            return returnItem;
+        }
+    }
+
+    public boolean equals(Object o) {
+        LinkedListDeque<T> lld = (LinkedListDeque<T>) o;
+        if (this == o) {
+            return true;
+        }
+        if (lld == null) {
+            return false;
+        }
+        if (!(lld instanceof LinkedListDeque)) {
+            return false;
+        }
+        if (lld.size() != this.size()) {
+            return false;
+        }
+        for (Node p1 = sentinel.next, p2 = lld.sentinel.next; p1 != sentinel; p1 = p1.next, p2 = p2.next) {
+            if (p1.item != p2.item) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public T getRecursive(int index) {
         if (index == 0) {
             return sentinel.next.item;

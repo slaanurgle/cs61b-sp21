@@ -67,4 +67,26 @@ public class ArrayDequeTest {
             ad1.printDeque();
         }
     }
+
+    @Test
+    public void iterationTest() {
+        ArrayDeque<Integer> ad1 = new ArrayDeque<>();
+        for (int i = 0; i < 10; i += 1) {
+            ad1.addLast(i);
+        }
+        int i = 0;
+        for (int item : ad1) {
+            assertEquals(i, item);
+            i += 1;
+        }
+
+    }
+
+    @Test
+    public void emptyIteration() {
+        ArrayDeque<Integer> ad1 = new ArrayDeque<>();
+        for (int item : ad1) {
+            System.out.println(item);
+        }
+    }
 }
