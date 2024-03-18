@@ -6,6 +6,14 @@ import org.junit.Test;
 /** Tests by Brendan Hu, Spring 2015, revised for 2016 by Josh Hug */
 public class TestBSTMap {
 
+    @Test
+    public void singlePutTest() {
+        BSTMap<String, Integer> b = new BSTMap<>();
+        b.put("C", 4);
+        assertEquals("C ", b.toString());
+    }
+
+
   	@Test
     public void sanityGenericsTest() {
     	try {
@@ -87,4 +95,58 @@ public class TestBSTMap {
         assertTrue(b.containsKey("hi"));
     }
 
+    @Test
+    public void singleRemoveTest() {
+        BSTMap<String, Integer> b = new BSTMap<>();
+        b.put("C", 4);
+        b.put("E", 4);
+        b.remove("C");
+        assertEquals("E ", b.toString());
+    }
+
+    @Test
+    public void multipleRemoveTest() {
+        BSTMap<String, Integer> b = new BSTMap<String, Integer>();
+        b.put("E", 4);
+        b.put("A", 5);
+        b.put("B", 3);
+        b.put("G", 9);
+        b.put("C", 1);
+        b.put("F", 8);
+        b.remove("G");
+        b.remove("K");
+        b.remove("F");
+        b.remove("E");
+        assertEquals("A B C ", b.toString());
+    }
+
+    @Test
+    public void removePairTest() {
+        BSTMap<String, Integer> b = new BSTMap<String, Integer>();
+        b.put("E", 4);
+        b.put("B", 5);
+        b.put("A", 3);
+        b.put("G", 9);
+        b.put("C", 1);
+        b.put("F", 8);
+        b.remove("G", 9);
+        b.remove("B", 5);
+        b.remove("F", 3);
+        b.remove("E", 4);
+        assertEquals("A C F ", b.toString());
+    }
+    @Test
+    public void iteratorTest() {
+        BSTMap<String, Integer> b = new BSTMap<String, Integer>();
+        b.put("E", 4);
+        b.put("A", 5);
+        b.put("B", 3);
+        b.put("G", 9);
+        b.put("C", 1);
+        b.put("F", 8);
+        for (String key : b) {
+            System.out.println(key);
+        }
+
+    }
 }
