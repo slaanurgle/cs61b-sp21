@@ -14,6 +14,45 @@ import java.util.Set;
 public class TestMyHashMap {
 
     @Test
+    public void singleAddTest() {
+        MyHashMap<String, Integer> a = new MyHashMap<>();
+        a.put("Dog", 4);
+        assertEquals(1, a.size());
+    }
+
+    @Test
+    public void multipleAddTest() {
+        MyHashMap<String, Integer> a = new MyHashMap<>();
+        for (int i = 0; i < 1000; i += 1) {
+            a.put("Dog" + i, i);
+        }
+        a.put("Dog888", 333);
+        assertEquals(1000, a.size());
+    }
+
+    @Test
+    public void containsKeyTest() {
+        MyHashMap<String, Integer> a = new MyHashMap<>();
+        for (int i = 0; i < 1000; i += 1) {
+            a.put("Dog" + i, i);
+        }
+        for (int i = 0; i < 1000; i += 1) {
+            assertTrue(a.containsKey("Dog" + i));
+        }
+    }
+
+    @Test
+    public void getTest() {
+        MyHashMap<String, Integer> a = new MyHashMap<>();
+        for (int i = 0; i < 100; i += 1) {
+            a.put("Dog" + i, i);
+        }
+        for (int i = 0; i < 100; i += 1) {
+            int val = a.get("Dog" + i);
+            assertEquals(val, i);
+        }
+    }
+    @Test
     public void sanityGenericsTest() {
         MyHashMap<String, String> a = new MyHashMap<>();
         MyHashMap<String, Integer> b = new MyHashMap<>();
