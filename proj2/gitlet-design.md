@@ -47,7 +47,9 @@ Branches are pointers pointing to the commits.
 
 The `.gitlet` Folder has these subdirectories: `added`, `removed`, `commits`, `files`. 
 
-In the `added` and `removed` folders are the added files and removed files(use `gitlet rm` command). In the `commits` folder are folders storing each commit, named according to **the first 6 digits of the hexadecimal expression of the commit id**. In the files folder are the folders storing each blob, named according to **the first 6 digits of the hexadecimal expression of the file id**.
+ In the `commits` folder are folders storing each commit, named according to **the first 6 digits of the hexadecimal expression of the commit id**. In the files folder are the folders storing each blob, named according to **the first 6 digits of the hexadecimal expression of the file id**.
+
+In the `added` and `removed` folders are the added files and removed files(use `gitlet rm` command), the file names are **their original name**, because in these folder, there are only one version and we do not need to check the identicality.
 
 ```
 CWD                             <==== Whatever the current working directory 
@@ -75,4 +77,4 @@ The `Commit` will set up persistence. It will:
 The `Repository` will set up persistence. It will: 
 
 1. Create all the files and directories needed. **All file operation are done in this class.**
-2. Create HEAD pointer, we do not need to create HEAD after initializing.
+2. Create **HEAD pointer**, we do not need to create HEAD after initializing.

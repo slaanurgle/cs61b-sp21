@@ -236,4 +236,11 @@ class Utils {
         System.out.printf(msg, args);
         System.out.println();
     }
+    public static void safetyCreate(File f) {
+        try {
+            f.createNewFile();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

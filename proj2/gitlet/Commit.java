@@ -7,6 +7,7 @@ import org.antlr.v4.runtime.tree.Tree;
 import java.io.File;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.TreeMap;
 
 import static gitlet.Utils.*;
@@ -30,18 +31,27 @@ public class Commit implements Serializable {
     /** The date of this Commit */
     private Date date;
     /** the parents of this Commit */
-    private Commit[] parents;
-    /** the blobs of this Commit */
-    private TreeMap<String, File> blobs;
+    LinkedList<Commit> parents;
+    /** the blobs of this Commit
+     *  Blobs are files storing the contents.
+     *  TreeMap maps the file name to file id. */
+    TreeMap<String, String> blobs; //
+
     /* TODO: fill in the rest of this class. */
     /* constructors */
     public Commit() {
         this("initial commit", new Date(0));
     }
 
+    public Commit(String message) {
+        this(message, new Date());
+    }
+
     public Commit(String message, Date date) {
         this.message = message;
         this.date = date;
+        this.blobs = new TreeMap<>();
+        this.parents = new LinkedList<>();
     }
     /** get the commit id */
     public String getID() {
@@ -52,6 +62,7 @@ public class Commit implements Serializable {
     public static void initCommit() {
         Commit c = new Commit();
         Repository.saveBranch("master", c);
+        Repository.setHead("master");
         Repository.saveCommit(c);
     }
 
@@ -59,5 +70,9 @@ public class Commit implements Serializable {
     public boolean contains(String fileId) {
         return blobs.containsKey(fileId);
     }
+
+//    public void addParent(Commit parent) {
+//        parents.add(parent);
+//    }
 
 }
