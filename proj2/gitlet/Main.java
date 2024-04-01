@@ -14,9 +14,13 @@ public class Main {
         switch(firstArg) {
             case "init":
                 // TODO: handle the `init` command
+                // initialize the repo
+                Repository.initRepo();
                 break;
             case "add":
                 // TODO: handle the `add [filename]` command
+                String filename = args[1];
+                Repository.addFile(filename);
                 break;
             // TODO: FILL THE REST IN
         }
