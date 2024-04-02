@@ -188,6 +188,11 @@ class Utils {
         return plainFilenamesIn(new File(dir));
     }
 
+    /** Check if DIR is empty */
+    static boolean isEmptyFolder(File dir) {
+        File[] files = dir.listFiles();
+        return files.length == 0;
+    }
     /* OTHER FILE UTILITIES */
 
     /** Return the concatentation of FIRST and OTHERS into a File designator,

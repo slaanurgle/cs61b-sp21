@@ -41,7 +41,7 @@ File id: the file id are compute using **the sha1 code of `String filename + Str
    - Get the HEAD commit, make it the parent of `newCommit`. Get the blobs of its parent, then check the blobs:
      - If there are files of same name, replace them with the files in staged area:
        - Check if the files are one of the versions of blobs, if so, add reference to them, if not, create new blob and add reference.
-   - Move the HEAD to the `newCommit`, 
+   - Move the HEAD to the `newCommit`, save the newCommit
 3. `removeFile(String filename)`: Add the given file to `.gitlet/remove` 
    - Check if HEAD has the file of same name.
      - If so, remove the file, add the file to `.gitlet/removed`, do not need to add contents, make sure there are only one file of the same name in the staged folders.

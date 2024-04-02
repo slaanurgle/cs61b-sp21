@@ -2,9 +2,6 @@ package gitlet;
 
 // TODO: any imports you need here
 
-import org.antlr.v4.runtime.tree.Tree;
-
-import java.io.File;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.LinkedList;
@@ -61,7 +58,7 @@ public class Commit implements Serializable {
     /** Initial the initial commit */
     public static void initCommit() {
         Commit c = new Commit();
-        Repository.saveBranch("master", c);
+        Repository.setBranch("master", c);
         Repository.setHead("master");
         Repository.saveCommit(c);
     }

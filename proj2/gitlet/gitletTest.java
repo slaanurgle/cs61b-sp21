@@ -7,8 +7,10 @@ import static gitlet.Utils.*;
 import java.io.File;
 
 public class gitletTest {
+    public static final File TEST = new File("C:\\Learning\\CS\\DataStructure\\cs61b\\cs61b-sp21\\proj2\\Unittest");
     public static final File CWD = new File(System.getProperty("user.dir"));
     public static void clearTest() {
+        Repository.clearFiles(TEST);
         Repository.clearRepo();
 //        if (TEST.exists()) {
 //            Repository.clearFolder(TEST);
@@ -35,5 +37,8 @@ public class gitletTest {
     public void repeatAddTest() {
         singleAddTest();
         Repository.addFile("a.txt");
+        File f2 = join(CWD, "b.txt");
+        writeContents(f2, "b\n");
+        Repository.addFile("b.txt");
     }
 }

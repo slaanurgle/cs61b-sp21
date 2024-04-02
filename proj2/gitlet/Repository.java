@@ -30,7 +30,7 @@ public class Repository {
     public static final File REMOVED_DIR = join(GITLET_DIR, "removed");
     public static final File OBJECTS_DIR = join(GITLET_DIR, "objects");
     public static final File COMMITS_DIR = join(OBJECTS_DIR, "commits");
-    public static final File BLOBS_DIR = join(OBJECTS_DIR, "objects");
+    public static final File BLOBS_DIR = join(OBJECTS_DIR, "blobs");
     public static final File BRANCHES_DIR = join(GITLET_DIR, "branches");
     public static final File HEAD = join(BRANCHES_DIR, "HEAD");
 
@@ -39,19 +39,29 @@ public class Repository {
     public static void clearRepo() {
         System.out.println(CWD);
         if (GITLET_DIR.exists()) {
-            clearFolder(GITLET_DIR);
+            RemoveFolder(GITLET_DIR);
         }
     }
     /** Helper Method: remove the DIRECTORY */
-    public static void clearFolder(File directory) {
+    public static void RemoveFolder(File directory) {
         File[] files = directory.listFiles();
         for (File f : files) {
             if (f.isDirectory()) {
-                clearFolder(f);
+                RemoveFolder(f);
             }
             f.delete();
         }
         directory.delete();
+    }
+
+    /** Remove the files under DIRECOTORY */
+    public static void clearFiles(File directory) {
+        File[] files = directory.listFiles();
+        for (File f : files) {
+            if (f.isFile()) {
+                f.delete();
+            }
+        }
     }
 
 
@@ -64,10 +74,11 @@ public class Repository {
         writeObject(f, commit);
     }
     /* Methods relevant to branches */
-    /** Save a branch as a file with given NAME and store the COMMIT id.
+    /** Set and save a branch as a file with given NAME and store the COMMIT id.
+     *  NAME can not be HEAD. Use setHead instead.
      *  If the file does not exist it will create it.
      *  If already exists, overwrite. */
-    public static void saveBranch(String name, Commit commit) {
+    public static void setBranch(String name, Commit commit) {
         File fIn = join(BRANCHES_DIR, name);
         if (!fIn.exists()) {
             safetyCreate(fIn);
@@ -132,7 +143,7 @@ public class Repository {
     /** Add the file specified by the string to repo.
      *  If the file does not exist, throw an error. */
     public static void addFile(String filename) {
-        File fIn = join("CWD", filename);
+        File fIn = join(CWD, filename);
         if (!fIn.exists()) {
             throw error("File does not exist.");
         }
@@ -142,16 +153,48 @@ public class Repository {
         String fileId = sha1(filename + contents);
         // Check if HEAD has same version of the file.
         Commit head = getCommit("HEAD");
-        if (head.blobs.get(filename).equals(fileId)) {
-            restrictedDelete(fAdd);
-            restrictedDelete(fRemove);
+        if (head.blobs.get(filename) != null && head.blobs.get(filename).equals(fileId)) {
+            fAdd.delete();
+            fRemove.delete();
         } else {
-            restrictedDelete(fRemove);
+            fRemove.delete();
             writeContents(fAdd, contents);
         }
     }
 
     /** Commit */
     public static void commit(String message) {
+        Commit newCommit = new Commit(message);
+        Commit head = toCommit("HEAD");
+        newCommit.parents.addFirst(head);
+        newCommit.blobs = new TreeMap<String, String>(head.blobs);
+        // Check if there exists staged files
+        if (isEmptyFolder(ADDED_DIR) && isEmptyFolder(REMOVED_DIR)) {
+            throw error("No changes added to the commit.");
+        }
+        // add the staged files
+        for (String addFilename : plainFilenamesIn(ADDED_DIR)) {
+            // add the added file to the blobs
+            String contents = readContentsAsString(join(ADDED_DIR, addFilename));
+            String addFileId = sha1(addFilename + contents);
+            newCommit.blobs.put(addFilename, addFileId);
+            // If the blob does not exist, create a new blob.
+            File newBlob = join(BLOBS_DIR, addFileId);
+            if (!newBlob.exists()) {
+                writeContents(newBlob, contents);
+            }
+        }
+        // remove the removed files.
+        for (String removeFilename : plainFilenamesIn(REMOVED_DIR)) {
+            // remove the removed file from the blobs
+            newCommit.blobs.remove(removeFilename);
+
+        }
+        // Clear the staged area.
+        clearFiles(ADDED_DIR);
+        clearFiles(REMOVED_DIR);
+        // Move HEAD and the branch it is pointing
+        String currBranch = getBranch("HEAD");
+        setBranch(currBranch, newCommit);
     }
 }
