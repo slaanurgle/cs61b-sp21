@@ -68,11 +68,12 @@ public class Commit implements Serializable {
 
     /** Check if this commit contain FILEID in the blobs */
     public boolean contains(String fileId) {
-        return blobs.containsKey(fileId);
+        return blobs.containsValue(fileId);
     }
 
 //    public void addParent(Commit parent) {
 //        parents.add(parent);
 //    }
+
 
 }

@@ -35,6 +35,7 @@ public class Repository {
     /* TODO: fill in the rest of this class. */
     /** Remove the .gitlet folder */
     public static void clearRepo() {
+        System.out.println(CWD);
         if (GITLET_DIR.exists()) {
             clearFolder(GITLET_DIR);
         }
@@ -131,7 +132,7 @@ public class Repository {
             throw error("File does not exist.");
         }
         String contents = readContentsAsString(fIn); // the contents of the added file
-        String id = sha1(contents); // the id of the added file
+        String id = sha1(serialize(filename + contents)); // the id of the added file
         File fOut = join(ADDED_DIR, filename); // the object file
         boolean fOutExists = fOut.exists();
         File fRemove = join(REMOVED_DIR, filename); // the file of the same name in ./removed
@@ -167,7 +168,10 @@ public class Repository {
         // the Commit has same blobs as its parent
         newCommit.blobs = new TreeMap<>(prevCommit.blobs);
         for (String f : plainFilenamesIn(ADDED_DIR)) {
-            if ()
+            File file = join(ADDED_DIR, f); // get the file object of string f
+
+        }
+        for (String f : plainFilenamesIn(REMOVED_DIR)) {
         }
         // Update the new version of the blobs
 
