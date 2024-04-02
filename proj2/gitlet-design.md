@@ -6,9 +6,9 @@
 
 Commits are represented by class ` Commit`. Blobs are represented by class `Repository`. Blobs are `file` Object.
 
-use a TreeMap to implement the blobs.
+Use a TreeMap to implement the blobs. Blobs id are compute according to the file and its file name.
 
-use nodes to implement commits.
+Commit id are compute according to the `Commit` Object.
 
 ### Class 1 Commit
 
@@ -20,34 +20,61 @@ In terms of the data structure to store commits, I use a **Graph**.  The Graph i
 
 #### Fields
 
-1. Field 1
-2. Field 2
+1. `private String message`
+2. `private Date date`
+3. `LinkedList<Commit> parents`
+4. `TreeMap<String, String> blobs` The TreeMap maps the file name to file id.
 
 ### Class 2 Repository
 
 Class Repository holds all the files in the directory `.gitlet`.
 
-I use TreeMap to implement the blobs.
-
-**IDs**: The blobs are different version of the files. The file ids will be use to search the specified file, it serves as keys in the TreeMap.
+File id: the file id are compute using **the sha1 code of `String filename + String contents`**
 
 #### Fields
 
-1. Field 1
-2. Field 2
-
-### (Test) Class 3 Branch
-
-Branches are pointers pointing to the commits.
+1. `addFile(String filename)`: add the given file to `.gitlet/added`. For example `a.txt`
+   - Check if HEAD has same version of the file. If so, there should be no `a.txt` in staged folders. Else, there should only be one `a.txt` in staged folders.
+   - Check if it is staged(removed or added),  make sure there are only one file of the same name in the staged folders.
+2. `commit(String message)`: Create a new commit from `.gitlet/added` and `.gitlet/removed`.
+   - Create a `Commit newCommit`, add message, current time.
+   - Get the HEAD commit, make it the parent of `newCommit`. Get the blobs of its parent, then check the blobs:
+     - If there are files of same name, replace them with the files in staged area:
+       - Check if the files are one of the versions of blobs, if so, add reference to them, if not, create new blob and add reference.
+   - Move the HEAD to the `newCommit`, 
+3. `removeFile(String filename)`: Add the given file to `.gitlet/remove` 
+   - Check if HEAD has the file of same name.
+     - If so, remove the file, add the file to `.gitlet/removed`, do not need to add contents, make sure there are only one file of the same name in the staged folders.
+     - If not, throw error.
+   - Check if it is staged(removed or added),  make sure there are only one file of the same name in the staged folders.
+4. `printLog()`: Print the commits from HEAD to the initial commit. Only traverse the first parent.
+   - Traverse from the HEAD commit, print id(compute instantly), date, message
+5. `printGlobalLog()`: Print all commits. 
+   - Print all commits in `.gitlet/objects/commits`
+6. `find(message)`:  Print the commits id that have the given message.
+   - Traverse all commits in `.gitlet/objects/commits`, if a commit has that message, print its id.
+7. `printStatus()`: Print branches, staged files, removed files, modification not staged for commit.
+   - compare the CWD and the blobs of HEAD, find the different files:
+     - If `.gitlet/remove` has the file but CWD also has:
+       - Print it in Untracked Files
+     - If the CWD does not have the file but HEAD has:
+       - It is staged to removed: print in Removed Files
+       - Not staged: print `a.txt (deleted)` in Modification Not Staged
+     - If the CWD has a file but HEAD does not have:
+       - Print it in Untracked files
+     - If the CWD has the file, but different version to HEAD:
+       - the CWD version is staged: print in Staged Files
+       - the CWD version is not staged: print in Modifications Not Staged
+8. 
 
 
 ## Algorithms
 
 ## Persistence
 
-The `.gitlet` Folder has these subdirectories: `added`, `removed`, `commits`, `files`. 
+The `.gitlet` Folder has these subdirectories: `added`, `removed`, `objects`. 
 
- In the `commits` folder are folders storing each commit, named according to **the first 6 digits of the hexadecimal expression of the commit id**. In the files folder are the folders storing each blob, named according to **the first 6 digits of the hexadecimal expression of the file id**.
+ In the `objects` folder are folders `commits` and `blobs`. `commits` stores each commit, named according to **the first 6 digits of the hexadecimal expression of the object id**. Some of the objects are commits, they stores the serialized Commit objects. Some of the objects are blobs, they stores one version of a file.
 
 In the `added` and `removed` folders are the added files and removed files(use `gitlet rm` command), the file names are **their original name**, because in these folder, there are only one version and we do not need to check the identicality.
 
@@ -55,17 +82,21 @@ In the `added` and `removed` folders are the added files and removed files(use `
 CWD                             <==== Whatever the current working directory 
 .gitlet                     <==== All persistant data is stored within here
 ├── added                   <====
-    ├── a
+    ├── a.txt
     ├── ...
 ├── removed 
-    ├── c
+    ├── c.txt
     ├── ...
-├── commits   
-    ├── 45e9f8
-    ├── ...
-└── files                      <==== 
-    ├── 3a243e                <==== 
-    ├── d741a3
+├── objects
+	├── commits
+        ├── 45e9f8
+        ├── ...
+    ├── blobs
+        ├── 348a17
+        ├── ...
+└── branches                      <==== 
+    ├── HEAD                <==== 
+    ├── master				
     ├── ...
 ```
 
@@ -77,4 +108,4 @@ The `Commit` will set up persistence. It will:
 The `Repository` will set up persistence. It will: 
 
 1. Create all the files and directories needed. **All file operation are done in this class.**
-2. Create **HEAD pointer**, we do not need to create HEAD after initializing.
+2. Create **HEAD pointer**, we do not need to create HEAD after initializing. **Remember to move HEAD and the branch it is pointing to.**

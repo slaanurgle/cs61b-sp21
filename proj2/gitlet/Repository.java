@@ -28,7 +28,9 @@ public class Repository {
     public static final File GITLET_DIR = join(CWD, ".gitlet");
     public static final File ADDED_DIR = join(GITLET_DIR, "added");
     public static final File REMOVED_DIR = join(GITLET_DIR, "removed");
-    public static final File OBJECTS_DIR = join(GITLET_DIR, "commits");
+    public static final File OBJECTS_DIR = join(GITLET_DIR, "objects");
+    public static final File COMMITS_DIR = join(OBJECTS_DIR, "commits");
+    public static final File BLOBS_DIR = join(OBJECTS_DIR, "objects");
     public static final File BRANCHES_DIR = join(GITLET_DIR, "branches");
     public static final File HEAD = join(BRANCHES_DIR, "HEAD");
 
@@ -57,7 +59,7 @@ public class Repository {
     public static void saveCommit(Commit commit) {
         // create a folder named the first 6 digits of the commit id
         String id = commit.getID();
-        File f = join(OBJECTS_DIR, id.substring(0, 6));
+        File f = join(COMMITS_DIR, id.substring(0, 6));
         safetyCreate(f);
         writeObject(f, commit);
     }
@@ -74,6 +76,16 @@ public class Repository {
         writeContents(fIn, id);
     }
 
+    /** get the commit of the ID, ID can be abbreviated
+     *  If the commit do not exists, return null. */
+    public static Commit toCommit(String id) {
+        File fIn = join(COMMITS_DIR, id.substring(0, 6));
+        if (!fIn.exists()) {
+            return null;
+        }
+        return readObject(fIn, Commit.class);
+    }
+
     /** Set BRANCH as HEAD pointer */
     public static void setHead(String branch) {
         writeContents(HEAD, branch);
@@ -88,15 +100,7 @@ public class Repository {
         }
         return readContentsAsString(fIn);
     }
-    /** get the commit of the ID, ID can be abbreviated
-     *  If the commit do not exists, return null. */
-    public static Commit toCommit(String id) {
-        File fIn = join(OBJECTS_DIR, id.substring(0, 6));
-        if (!fIn.exists()) {
-            return null;
-        }
-        return readObject(fIn, Commit.class);
-    }
+
     /** get the commit of the BRANCH
      *  if the branch point to a non-exist commit, return null */
     public static Commit getCommit(String branch) {
@@ -117,6 +121,8 @@ public class Repository {
         ADDED_DIR.mkdir();
         REMOVED_DIR.mkdir();
         OBJECTS_DIR.mkdir();
+        COMMITS_DIR.mkdir();
+        BLOBS_DIR.mkdir();
         BRANCHES_DIR.mkdir();
         safetyCreate(HEAD);
         Commit.initCommit();
@@ -126,54 +132,26 @@ public class Repository {
     /** Add the file specified by the string to repo.
      *  If the file does not exist, throw an error. */
     public static void addFile(String filename) {
-        File fIn = join(CWD, filename);
-        // the file does not exist in CWD
+        File fIn = join("CWD", filename);
         if (!fIn.exists()) {
             throw error("File does not exist.");
         }
-        String contents = readContentsAsString(fIn); // the contents of the added file
-        String id = sha1(serialize(filename + contents)); // the id of the added file
-        File fOut = join(ADDED_DIR, filename); // the object file
-        boolean fOutExists = fOut.exists();
-        File fRemove = join(REMOVED_DIR, filename); // the file of the same name in ./removed
-        boolean fRemoveExists = fRemove.exists();
-        // If current branch has identical version, do not stage it and remove it if it is already in ./added
+        File fAdd = join(ADDED_DIR, filename);
+        File fRemove = join(REMOVED_DIR, filename);
+        String contents = readContentsAsString(fIn);
+        String fileId = sha1(filename + contents);
+        // Check if HEAD has same version of the file.
         Commit head = getCommit("HEAD");
-        if (head.contains(id)) {
-            if (fOutExists) {
-                restrictedDelete(fOut);
-            }
-        }
-        if (fRemoveExists) {
+        if (head.blobs.get(filename).equals(fileId)) {
+            restrictedDelete(fAdd);
             restrictedDelete(fRemove);
+        } else {
+            restrictedDelete(fRemove);
+            writeContents(fAdd, contents);
         }
-        // there exists same file in ./added
-        if (!fOutExists) {
-            safetyCreate(fOut);
-        }
-        writeContents(fOut, contents);
-
     }
 
     /** Commit */
     public static void commit(String message) {
-        String currBranch = getBranch("HEAD");
-        Commit newCommit = new Commit(message);
-        Commit prevCommit = getCommit("HEAD");
-        // set parent
-        newCommit.parents.add(prevCommit);
-        // move current Branch and head
-        saveBranch(currBranch, newCommit);
-        setHead(currBranch);
-        // the Commit has same blobs as its parent
-        newCommit.blobs = new TreeMap<>(prevCommit.blobs);
-        for (String f : plainFilenamesIn(ADDED_DIR)) {
-            File file = join(ADDED_DIR, f); // get the file object of string f
-
-        }
-        for (String f : plainFilenamesIn(REMOVED_DIR)) {
-        }
-        // Update the new version of the blobs
-
     }
 }
