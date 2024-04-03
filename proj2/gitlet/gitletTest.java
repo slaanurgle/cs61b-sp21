@@ -32,6 +32,7 @@ public class gitletTest {
         safetyCreate(f1);
         writeContents(f1, "a\n");
         Repository.addFile("a.txt");
+        //printStatus();
     }
 
     @Test

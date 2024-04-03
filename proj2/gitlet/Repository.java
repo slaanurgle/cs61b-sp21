@@ -1,7 +1,7 @@
 package gitlet;
 
 import java.io.File;
-import java.util.TreeMap;
+import java.util.*;
 
 import static gitlet.Utils.*;
 
@@ -117,7 +117,18 @@ public class Repository {
         return toCommit(getId(branch));
     }
 
-
+    /** return whether FILENAME is added */
+    public static boolean isAdded(String filename) {
+        return join(ADDED_DIR, filename).exists();
+    }
+    /** return whether FILENAME is removed */
+    public static boolean isRemoved(String filename) {
+        return join(REMOVED_DIR, filename).exists();
+    }
+    /** return whether a filename is Staged(Added or removed) */
+    public static boolean isStaged(String filename) {
+        return isAdded(filename) || isRemoved(filename);
+    }
     /** Initial the repo. Create all the directories needed.
      *  If .gitlet already exists, throws error.
      */
@@ -247,6 +258,113 @@ public class Repository {
         }
     }
 
-    
+    public static void printStatus() {
+        // Classify the files.
+        ArrayList<String> added = new ArrayList<>(plainFilenamesIn(ADDED_DIR)); // The strings to be print.
+        ArrayList<String> removed = new ArrayList<>(plainFilenamesIn(REMOVED_DIR));
+        ArrayList<String> modified = new ArrayList<>();
+        ArrayList<String> untracked = new ArrayList<>();
+        Commit head = getCommit("HEAD");
+        TreeMap<String, String> headBlobs = head.blobs;
+        // Get the files of CWD.
+        HashMap<String, String> cwdFiles = new HashMap<>();
+        for (String cwdFilename : plainFilenamesIn(CWD)) {
+            File cwdFile = join(CWD, cwdFilename);
+            if (cwdFile.isFile()) {
+                String cwdFileId = sha1(cwdFilename + readContentsAsString(cwdFile));
+                cwdFiles.put(cwdFilename, cwdFileId);
+            }
+        }
+        // classify modified files.
+        /* traverse the files in the working directory,
+           If it is tracked in the current commit, changed in the working directory, but not staged.
+         */
+        for (Map.Entry<String, String> entry : cwdFiles.entrySet()) {
+            String filename = entry.getKey();
+            String fileId = entry.getValue();
+            if (headBlobs.containsKey(filename) && !headBlobs.get(filename).equals(fileId)) {
+                if (!isStaged(filename)) {
+                    modified.add(filename + " (modified)");
+                }
+            }
+        }
+        /* Staged for addition, but with different contents than in the working directory.
+           Staged for addition, but deleted in the working directory.
+         */
+        for (String filename : plainFilenamesIn(ADDED_DIR)) {
+            String contents = readContentsAsString(join(ADDED_DIR, filename));
+            String fileId = sha1(filename + contents);
+            if (!cwdFiles.containsValue(fileId)) {
+                added.remove(filename);
+                modified.add(filename + " (modified)");
+            }
+        }
+        // Not staged for removal, but tracked in the current commit and deleted from the working directory.
+        for (Map.Entry<String, String> entry : head.blobs.entrySet()) {
+            String filename = entry.getKey();
+            String fileId = entry.getValue();
+            // HEAD has the files but CWD does not have
+            if (!join(REMOVED_DIR, filename).exists() && !join(CWD, filename).exists()) {
+                modified.add(filename + " (deleted)");
+            }
+        }
+        // Classify untracked files.
+        // Files present in the working directory but neither staged for addition nor tracked.
+        for (Map.Entry<String, String> entry : cwdFiles.entrySet()) {
+            String filename = entry.getKey();
+            String fileId = entry.getValue();
+            if (!isStaged(filename) && !headBlobs.containsKey(filename)) {
+                untracked.add(filename);
+            }
+        }
+        // Files that have been staged for removal, but then re-created without Gitlet’s knowledge
+        for (String filename : plainFilenamesIn(REMOVED_DIR)) {
+            if (join(CWD, filename).exists()) {
+                removed.remove(filename);
+                untracked.add(filename);
+            }
+        }
+        Collections.sort(added);
+        Collections.sort(removed);
+        Collections.sort(modified);
+        Collections.sort(untracked);
+        // Print branches.
+        System.out.println("=== Branches ===");
+        String headBranch = getHead();
+        for (String branch : plainFilenamesIn(BRANCHES_DIR)) {
+            if (branch.equals("HEAD")) {
+                continue;
+            }
+            if (branch.equals(headBranch)) {
+                System.out.print("*");
+            }
+            System.out.println(branch);
+        }
+        System.out.println();
+        // Print staged files.
+        System.out.println("=== Staged Files ===");
+        for (String s : added) {
+            System.out.println(s);
+        }
+        System.out.println();
+        // Print removed files.
+        System.out.println("=== Removed Files ===");
+        for (String s : removed) {
+            System.out.println(s);
+        }
+        System.out.println();
+        // Print modifications not staged for commit.
+        System.out.println("=== Modifications Not Staged For Commit ===");
+        for (String s : modified) {
+            System.out.println(s);
+        }
+        System.out.println();
+        // print untracked files.
+        System.out.println("=== Untracked Files` ===");
+        for (String s : untracked) {
+            System.out.println(s);
+        }
+        System.out.println();
+    }
 
 }

@@ -42,6 +42,9 @@ public class Main {
             case "global-log":
                 Repository.printGlobalLog();
                 break;
+            case "status":
+                Repository.printStatus();
+                break;
             default:
                 error("No command with that name exists.");
             // TODO: FILL THE REST IN
