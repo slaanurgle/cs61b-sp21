@@ -3,9 +3,7 @@ package gitlet;
 // TODO: any imports you need here
 
 import java.io.Serializable;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.TreeMap;
+import java.util.*;
 
 import static gitlet.Utils.*;
 
@@ -76,8 +74,11 @@ public class Commit implements Serializable {
             System.out.print(" ");
             System.out.println(secondParent);
         }
-        System.out.printf("Date: %ta %tb %te %tT %tY %tZ", date ,date, date, date, date, date); // Date: Thu Nov 9 17:01:33 2017 -0800
-        System.out.println();
+        Formatter dateFormatter = new Formatter();
+        // Format: Date: Thu Nov 9 17:01:33 2017 -0800
+        dateFormatter.format(Locale.US, "Date: %ta %tb %te %tT %tY %tz", date ,date, date, date, date, date);
+
+        System.out.println(dateFormatter);
         System.out.println(message);
         System.out.println();
     }

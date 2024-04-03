@@ -45,9 +45,10 @@ File id: the file id are compute using **the sha1 code of `String filename + Str
    - Move the HEAD to the `newCommit`, save the newCommit
 3. `removeFile(String filename)`: Add the given file to `.gitlet/remove` 
    - Check if HEAD has the file of same name.
-     - If so, remove the file, add the file to `.gitlet/removed`, do not need to add contents, make sure there are only one file of the same name in the staged folders.
-     - If not, throw error.
-   - Check if it is staged(removed or added),  make sure there are only one file of the same name in the staged folders.
+     - If so, **remove the file**, add the file to `.gitlet/removed`, do not need to add contents, make sure there are only one file of the same name in the staged folders.
+     - If not, check if it is staged(removed or added):
+       - If so, make sure there are no file of the same name in the staged folders.
+       - If not, throw error.
 4. `printLog()`: Print the commits from HEAD to the initial commit. Only traverse the first parent.
    - Traverse from the HEAD commit, print id(compute instantly), date, message
 5. `printGlobalLog()`: Print all commits. 

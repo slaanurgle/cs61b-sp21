@@ -443,4 +443,15 @@ public class Repository {
         // move HEAD
         setHead(branch);
     }
+
+    /** Create NEWBRANCH */
+    public static void createBranch(String newBranch) {
+        File fBranch = join(BRANCHES_DIR, newBranch);
+        if (fBranch.exists()) {
+            throw error("A branch with that name already exists.");
+        }
+        String commitId = getId("HEAD");
+        writeContents(fBranch, commitId);
+        setHead(newBranch);
+    }
 }

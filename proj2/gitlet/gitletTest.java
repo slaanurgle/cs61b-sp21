@@ -11,15 +11,11 @@ import static gitlet.Utils.*;
 import java.io.File;
 
 public class gitletTest {
-    public static final File TEST = new File("C:\\Learning\\CS\\DataStructure\\cs61b\\cs61b-sp21\\proj2\\Unittest");
+    //public static final File TEST = new File("C:\\Learning\\CS\\DataStructure\\cs61b\\cs61b-sp21\\proj2\\Unittest");
     public static final File CWD = new File(System.getProperty("user.dir"));
     public static void clearTest() {
-        Repository.clearFiles(TEST);
+        Repository.clearFiles(CWD);
         Repository.clearRepo();
-//        if (TEST.exists()) {
-//            Repository.clearFolder(TEST);
-//        }
-//        TEST.mkdir();
     }
     @Test
     public void initTest() {
@@ -125,5 +121,9 @@ public class gitletTest {
         printLog();
         checkoutFile("a.txt");
         //Repository.printGlobalLog();
+    }
+    @Test
+    public void branchesTest() {
+        
     }
 }

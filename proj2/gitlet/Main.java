@@ -65,6 +65,9 @@ public class Main {
                     default:
                         throw error("Incorrect operands.");
                 }
+            case "branch":
+
+                Repository.createBranch(args[1]);
             default:
                 error("No command with that name exists.");
             // TODO: FILL THE REST IN
