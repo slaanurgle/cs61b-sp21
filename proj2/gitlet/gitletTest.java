@@ -1,4 +1,7 @@
-/** This file must be run in CWD/Unittest */
+/** This file must be run in CWD/Unittest
+ *  Some of the method use restrictedDelete method,
+ *  which will make this test unable to work correctly.
+ */
 package gitlet;
 
 import static gitlet.Repository.*;
@@ -102,5 +105,25 @@ public class gitletTest {
         removeFile("a.txt");
         commit("Remove a.txt");
         printLog();
+    }
+
+    @Test
+    public void versionsCheckoutTest() {
+        clearTest();
+        Repository.initRepo();
+        File f1 = join(CWD, "a.txt");
+        safetyCreate(f1);
+        writeContents(f1, "a\n");
+        Repository.addFile("a.txt");
+        Repository.commit("Add a.txt");
+        writeContents(f1, "a version 2\n");
+        Repository.addFile("a.txt");
+        Repository.commit("a.txt version  2");
+        writeContents(f1, "a\n");
+        Repository.addFile("a.txt");
+        Repository.commit("a.txt back to initial");
+        printLog();
+        checkoutFile("a.txt");
+        //Repository.printGlobalLog();
     }
 }

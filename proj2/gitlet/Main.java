@@ -45,6 +45,26 @@ public class Main {
             case "status":
                 Repository.printStatus();
                 break;
+            case "checkout":
+                switch(args.length) {
+                    case 2:
+                        Repository.checkoutBranch(args[1]);
+                        break;
+                    case 3:
+                        if (!args[1].equals("--")) {
+                            throw error("Incorrect operands.");
+                        }
+                        Repository.checkoutFile(args[2]);
+                        break;
+                    case 4:
+                        if (!args[2].equals("--")) {
+                            throw error("Incorrect operands.");
+                        }
+                        Repository.checkoutFile(args[1], args[3]);
+                        break;
+                    default:
+                        throw error("Incorrect operands.");
+                }
             default:
                 error("No command with that name exists.");
             // TODO: FILL THE REST IN

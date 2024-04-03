@@ -72,6 +72,10 @@ public class Repository {
         writeObject(f, commit);
     }
     /* Methods relevant to branches */
+    /** Return NAME is a true branch in BRANCH_DIR */
+    public static boolean isBranch(String name) {
+        return join(BRANCHES_DIR, name).exists();
+    }
     /** Set and save a branch as a file with given NAME and store the COMMIT id.
      *  NAME can not be HEAD. Use setHead instead.
      *  If the file does not exist it will create it.
@@ -367,4 +371,76 @@ public class Repository {
         System.out.println();
     }
 
+    /** Checkout a FILENAME to head version */
+    public static void checkoutFile(String filename) {
+        checkoutFile(getId("HEAD"), filename);
+    }
+    /** Checkout FILENAME to COMMITID version */
+    public static void checkoutFile(String commitId, String filename) {
+        // Move the file of the commit id to CWD.
+        Commit commit = toCommit(commitId.substring(0, 6));
+        if (commit == null) {
+            throw error("No commit with that id exists.");
+        }
+        String blobid = commit.blobs.get(filename);
+        String contents = readContentsAsString(join(BLOBS_DIR, blobid));
+        if (contents == null) {
+            throw error("File does not exist in that commit.");
+        }
+        writeContents(join(CWD, filename), contents);
+    }
+
+    /** Checkout to BRANCH */
+    public static void checkoutBranch(String branch) {
+        if (!isBranch(branch)) {
+            throw error("No such branch exists.");
+        }
+        if (branch.equals(getHead())) {
+            throw error("No need to checkout the current branch.");
+        }
+        Commit head = getCommit("HEAD");
+        Commit commit = getCommit(branch);
+        // Get the files of CWD.
+        HashMap<String, String> cwdFiles = new HashMap<>();
+        for (String cwdFilename : plainFilenamesIn(CWD)) {
+            File cwdFile = join(CWD, cwdFilename);
+            if (cwdFile.isFile()) {
+                String cwdFileId = sha1(cwdFilename + readContentsAsString(cwdFile));
+                cwdFiles.put(cwdFilename, cwdFileId);
+            }
+        }
+        // Check whether there are untracked file and would be overwritten.
+        for (Map.Entry<String, String> entry : head.blobs.entrySet()) {
+            String filename = entry.getKey();
+            String fileId = entry.getValue();
+            /* If a working file is untracked in the current branch
+               and would be overwritten by the checkout, throw error.
+             */
+            if (cwdFiles.containsKey(filename) && !cwdFiles.get(filename).equals(fileId)) {
+                throw error("There is an untracked file in the way; delete it, or add and commit it first.");
+            }
+        }
+        // Delete all files in CWD, then write the blobs of the commit to CWD
+        for (File f : CWD.listFiles()) {
+            if (f.isFile()) {
+                restrictedDelete(f);
+            }
+        }
+        // Write the blobs of the commit to CWD
+        for (Map.Entry<String, String> entry : commit.blobs.entrySet()) {
+            String filename = entry.getKey();
+            String fileId = entry.getValue();
+            String contents = readContentsAsString(join(BLOBS_DIR, fileId));
+            writeContents(join(CWD, filename), contents);
+        }
+        // Clear the staged area
+        for (File f : ADDED_DIR.listFiles()) {
+            f.delete();
+        }
+        for (File f : REMOVED_DIR.listFiles()) {
+            f.delete();
+        }
+        // move HEAD
+        setHead(branch);
+    }
 }
