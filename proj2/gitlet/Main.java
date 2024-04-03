@@ -34,6 +34,8 @@ public class Main {
                 Repository.commit(message);
                 break;
             case "rm":
+                filename = args[1];
+                Repository.removeFile(filename);
             case "log":
                 Repository.printLog();
                 break;

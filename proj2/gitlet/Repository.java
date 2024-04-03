@@ -161,6 +161,30 @@ public class Repository {
         }
     }
 
+    /** Remove the file specified by FILENAME */
+    public static void removeFile(String filename) {
+        File fIn = join(CWD, filename);
+        File fAdd = join(ADDED_DIR, filename);
+        File fRemove = join(REMOVED_DIR, filename);
+        // Check if HEAD has the file of same name.
+        Commit head = getCommit("HEAD");
+        if (head.blobs.get(filename) != null) {
+            // The removed file is tracked.
+            // Remove this file in CWD.
+            restrictedDelete(fIn);
+            // Then make sure there are only this file in removed area.
+            fAdd.delete();
+            safetyCreate(fRemove);
+        } else {
+            // The removed file is not tracked.
+            // Check CWD, if the file does not exist, throw error.
+            if (!fIn.exists()) {
+                throw error("No reason to remove the file.");
+            }
+            fAdd.delete();
+            fRemove.delete();
+        }
+    }
     /** Commit */
     public static void commit(String message) {
         Commit newCommit = new Commit(message);
@@ -187,7 +211,6 @@ public class Repository {
         for (String removeFilename : plainFilenamesIn(REMOVED_DIR)) {
             // remove the removed file from the blobs
             newCommit.blobs.remove(removeFilename);
-
         }
         // Clear the staged area.
         clearFiles(ADDED_DIR);
@@ -223,4 +246,7 @@ public class Repository {
             }
         }
     }
+
+    
+
 }

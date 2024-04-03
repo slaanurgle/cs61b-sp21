@@ -85,4 +85,21 @@ public class gitletTest {
         findCommits("Add new file.");
 
     }
+
+    @Test
+    public void singleRemoveTest() {
+        clearTest();
+        initRepo();
+        File f1 = join(CWD, "a.txt");
+        File f2 = join(CWD, "b.txt");
+        writeContents(f1, "a");
+        writeContents(f2, "b");
+        addFile("b.txt");
+        addFile("a.txt");
+        removeFile("b.txt");
+        commit("Add a.txt");
+        removeFile("a.txt");
+        commit("Remove a.txt");
+        printLog();
+    }
 }
