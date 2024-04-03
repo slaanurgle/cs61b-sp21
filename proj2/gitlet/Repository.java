@@ -37,7 +37,6 @@ public class Repository {
     /* TODO: fill in the rest of this class. */
     /** Remove the .gitlet folder */
     public static void clearRepo() {
-        System.out.println(CWD);
         if (GITLET_DIR.exists()) {
             RemoveFolder(GITLET_DIR);
         }
@@ -70,7 +69,6 @@ public class Repository {
         // create a folder named the first 6 digits of the commit id
         String id = commit.getID();
         File f = join(COMMITS_DIR, id.substring(0, 6));
-        safetyCreate(f);
         writeObject(f, commit);
     }
     /* Methods relevant to branches */
@@ -80,11 +78,13 @@ public class Repository {
      *  If already exists, overwrite. */
     public static void setBranch(String name, Commit commit) {
         File fIn = join(BRANCHES_DIR, name);
-        if (!fIn.exists()) {
-            safetyCreate(fIn);
-        }
         String id = commit.getID();
         writeContents(fIn, id);
+    }
+
+    /** Set BRANCH as HEAD pointer */
+    public static void setHead(String branch) {
+        writeContents(HEAD, branch);
     }
 
     /** get the commit of the ID, ID can be abbreviated
@@ -96,26 +96,25 @@ public class Repository {
         }
         return readObject(fIn, Commit.class);
     }
-
-    /** Set BRANCH as HEAD pointer */
-    public static void setHead(String branch) {
-        writeContents(HEAD, branch);
+    /** Get the branch that HEAD is pointing to */
+    public static String getHead() {
+        return readContentsAsString(HEAD);
     }
     /** Get the commit ID that the NAME branch pointing, HEAD is also ok */
-    public static String getBranch(String name) {
+    public static String getId(String name) {
         File fIn;
         if (name.equals("HEAD")) {
-            fIn = join(BRANCHES_DIR, readContentsAsString(HEAD));
+            fIn = join(BRANCHES_DIR, getHead());
         } else {
             fIn = join(BRANCHES_DIR, name);
         }
         return readContentsAsString(fIn);
     }
 
-    /** get the commit of the BRANCH
+    /** get the commit of the BRANCH, HEAD is also ok.
      *  if the branch point to a non-exist commit, return null */
     public static Commit getCommit(String branch) {
-        return toCommit(getBranch(branch));
+        return toCommit(getId(branch));
     }
 
 
@@ -165,7 +164,7 @@ public class Repository {
     /** Commit */
     public static void commit(String message) {
         Commit newCommit = new Commit(message);
-        Commit head = toCommit("HEAD");
+        Commit head = getCommit("HEAD");
         newCommit.parents.addFirst(head);
         newCommit.blobs = new TreeMap<String, String>(head.blobs);
         // Check if there exists staged files
@@ -193,8 +192,35 @@ public class Repository {
         // Clear the staged area.
         clearFiles(ADDED_DIR);
         clearFiles(REMOVED_DIR);
+        // Save the newCommit.
+        saveCommit(newCommit);
         // Move HEAD and the branch it is pointing
-        String currBranch = getBranch("HEAD");
+        String currBranch = getHead();
         setBranch(currBranch, newCommit);
+    }
+
+    public static void printLog() {
+        Commit head = getCommit("HEAD");
+        Commit p;
+        for (p = head; !p.parents.isEmpty(); p = p.parents.get(0)) {
+            p.printInfo();
+        }
+        p.printInfo();
+    }
+
+    public static void printGlobalLog() {
+        for (String commitId : plainFilenamesIn(COMMITS_DIR)) {
+            Commit commit = readObject(join(COMMITS_DIR, commitId), Commit.class);
+            commit.printInfo();
+        }
+    }
+
+    public static void findCommits(String message) {
+        for (String commitId : plainFilenamesIn(COMMITS_DIR)) {
+            Commit commit = readObject(join(COMMITS_DIR, commitId), Commit.class);
+            if (commit.message.equals(message)) {
+                commit.printInfo();
+            }
+        }
     }
 }

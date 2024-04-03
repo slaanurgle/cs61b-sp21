@@ -24,7 +24,7 @@ public class Commit implements Serializable {
      * variable is used. We've provided one example for `message`.
      */
     /** The message of this Commit. */
-    private String message;
+    String message;
     /** The date of this Commit */
     private Date date;
     /** the parents of this Commit */
@@ -61,6 +61,25 @@ public class Commit implements Serializable {
         Repository.setBranch("master", c);
         Repository.setHead("master");
         Repository.saveCommit(c);
+    }
+
+    public void printInfo() {
+        String id = this.getID();
+        System.out.println("===");
+        System.out.print("commit ");
+        System.out.println(id);
+        if (parents.size() == 2) {
+            String firstParent = parents.get(0).getID().toString().substring(0, 7);
+            String secondParent = parents.get(0).getID().toString().substring(0, 7);
+            System.out.print("Merge: ");
+            System.out.print(firstParent);
+            System.out.print(" ");
+            System.out.println(secondParent);
+        }
+        System.out.printf("Date: %ta %tb %te %tT %tY %tZ", date ,date, date, date, date, date); // Date: Thu Nov 9 17:01:33 2017 -0800
+        System.out.println();
+        System.out.println(message);
+        System.out.println();
     }
 
 

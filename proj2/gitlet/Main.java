@@ -33,6 +33,13 @@ public class Main {
                 String message = args[1];
                 Repository.commit(message);
                 break;
+            case "rm":
+            case "log":
+                Repository.printLog();
+                break;
+            case "global-log":
+                Repository.printGlobalLog();
+                break;
             default:
                 error("No command with that name exists.");
             // TODO: FILL THE REST IN
