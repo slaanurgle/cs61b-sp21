@@ -1,24 +1,35 @@
 /** This file must be run in CWD/Unittest
- *  Some of the method use restrictedDelete method,
- *  which will make this test unable to work correctly.
  */
 package gitlet;
 
 import static gitlet.Repository.*;
 import org.junit.Test;
-import org.junit.Assert;
+
 import static gitlet.Utils.*;
 import java.io.File;
 
 public class gitletTest {
-    //public static final File TEST = new File("C:\\Learning\\CS\\DataStructure\\cs61b\\cs61b-sp21\\proj2\\Unittest");
-    public static final File CWD = new File(System.getProperty("user.dir"));
+    public static final String TESTPATH = "C:\\Learning\\CS\\DataStructure\\cs61b\\cs61b-sp21\\proj2\\Unittest";
+
+    public static File CWD;
+
+    public static void quickCreate(String filename) {
+        writeContents(join(CWD, filename), "filename" + "111\n");
+    }
+    public static void addAndCommit(String filename) {
+        addFile(filename);
+        commit("add " + filename);
+    }
+
+    /** Make preparation for the test, all test should start with this. */
     public static void clearTest() {
-        Repository.clearFiles(CWD);
+        System.setProperty("user.dir", TESTPATH);
+        CWD = new File(System.getProperty("user.dir"));
         Repository.clearRepo();
+        Repository.clearFiles(CWD);
     }
     @Test
-    public void initTest() {
+    public void initializingTest() {
         clearTest();
         Repository.initRepo();
     }
@@ -124,6 +135,18 @@ public class gitletTest {
     }
     @Test
     public void branchesTest() {
-        
+        clearTest();
+        initRepo();
+        quickCreate("a.txt");
+        addAndCommit("a.txt");
+        createBranch("brnA");
+        quickCreate("b.txt");
+        addAndCommit("b.txt");
+        checkoutBranch("master");
+        printLog();
+        printStatus();
+        checkoutBranch("brnA");
+        printLog();
+        printStatus();
     }
 }

@@ -454,4 +454,9 @@ public class Repository {
         writeContents(fBranch, commitId);
         setHead(newBranch);
     }
+
+    /** Remove branch */
+    public static void removeBranch(String branch) {
+
+    }
 }
