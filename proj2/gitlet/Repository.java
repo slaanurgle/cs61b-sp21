@@ -1,24 +1,18 @@
 package gitlet;
 
-import edu.princeton.cs.algs4.LinkedQueue;
-
 import java.io.File;
-import java.lang.reflect.Array;
 import java.util.*;
 
 import static gitlet.Utils.*;
 
-// TODO: any imports you need here
 
 /** Represents a gitlet repository.
- *  TODO: It's a good idea to give a description here of what else this Class
  *  does at a high level.
  *
- *  @author TODO
+ *  @author Slaanurgle
  */
 public class Repository {
     /**
-     * TODO: add instance variables here.
      *
      * List all instance variables of the Repository class here with a useful
      * comment above them describing what that variable represents and how that
@@ -41,15 +35,15 @@ public class Repository {
     /** Remove the .gitlet folder */
     public static void clearRepo() {
         if (GITLET_DIR.exists()) {
-            RemoveFolder(GITLET_DIR);
+            removeFolder(GITLET_DIR);
         }
     }
     /** Helper Method: remove the DIRECTORY */
-    public static void RemoveFolder(File directory) {
+    public static void removeFolder(File directory) {
         File[] files = directory.listFiles();
         for (File f : files) {
             if (f.isDirectory()) {
-                RemoveFolder(f);
+                removeFolder(f);
             }
             f.delete();
         }
@@ -136,13 +130,20 @@ public class Repository {
     public static boolean isStaged(String filename) {
         return isAdded(filename) || isRemoved(filename);
     }
+
+    /** Check if CWD has .gitlet */
+    public static boolean hasGitlet() {
+        return GITLET_DIR.exists();
+    }
+    /* Below are the command method */
     /** Initial the repo. Create all the directories needed.
      *  If .gitlet already exists, throws error.
      */
     public static void initRepo() {
         // check whether .gitlet is already exists.
         if (GITLET_DIR.exists()) {
-             throw error("A Gitlet version-control system already exists in the current directory.");
+            throw error("A Gitlet version-control system " +
+                    "already exists in the current directory.\n");
         }
         // create the directories of the repo
         GITLET_DIR.mkdir();
@@ -156,7 +157,6 @@ public class Repository {
         Commit.initCommit();
     }
 
-    /* Below are the command method */
     /** Add the file specified by the string to repo.
      *  If the file does not exist, throw an error. */
     public static void addFile(String filename) {
@@ -211,7 +211,7 @@ public class Repository {
         newCommit.blobs = new TreeMap<String, String>(head.blobs);
         // Check if there exists staged files
         if (isEmptyFolder(ADDED_DIR) && isEmptyFolder(REMOVED_DIR)) {
-            throw error("No changes added to the commit.");
+            throw error("No changes added to the commit.\n");
         }
         // add the staged files
         for (String addFilename : plainFilenamesIn(ADDED_DIR)) {
@@ -257,17 +257,22 @@ public class Repository {
     }
 
     public static void findCommits(String message) {
+        boolean commitFound = false;
         for (String commitId : plainFilenamesIn(COMMITS_DIR)) {
             Commit commit = readObject(join(COMMITS_DIR, commitId), Commit.class);
             if (commit.message.equals(message)) {
                 commit.printInfo();
+                commitFound = true;
             }
+        }
+        if (!commitFound) {
+            throw error("Found no commit with that message.");
         }
     }
 
     public static void printStatus() {
         // Classify the files.
-        ArrayList<String> added = new ArrayList<>(plainFilenamesIn(ADDED_DIR)); // The strings to be print.
+        ArrayList<String> added = new ArrayList<>(plainFilenamesIn(ADDED_DIR));
         ArrayList<String> removed = new ArrayList<>(plainFilenamesIn(REMOVED_DIR));
         ArrayList<String> modified = new ArrayList<>();
         ArrayList<String> untracked = new ArrayList<>();
@@ -277,7 +282,8 @@ public class Repository {
         HashMap<String, String> cwdFiles = getCWDFiles();
         // classify modified files.
         /* traverse the files in the working directory,
-           If it is tracked in the current commit, changed in the working directory, but not staged.
+           If it is tracked in the current commit,
+           changed in the working directory, but not staged.
          */
         for (Map.Entry<String, String> entry : cwdFiles.entrySet()) {
             String filename = entry.getKey();
@@ -304,7 +310,9 @@ public class Repository {
                 modified.add(filename + " (deleted)");
             }
         }
-        // Not staged for removal, but tracked in the current commit and deleted from the working directory.
+        /* Not staged for removal, but tracked in the current commit
+           and deleted from the working directory.
+         */
         for (Map.Entry<String, String> entry : head.blobs.entrySet()) {
             String filename = entry.getKey();
             String fileId = entry.getValue();
@@ -459,20 +467,13 @@ public class Repository {
         ArrayList<String> untrackedFiles = getUntrackedFiles();
         for (String untracked : untrackedFiles) {
             if (commit.blobs.containsKey(untracked)) {
-                throw error("There is an untracked file in the way; delete it, or add and commit it first.");
+                throw error("There is an untracked file in the way; delete it, " +
+                        "or add and commit it first.");
             }
         }
-//        for (Map.Entry<String, String> entry : cwdFiles.entrySet()) {
-//            String filename = entry.getKey();
-//            String fileId = entry.getValue();
-//            /* If a working file is untracked in the current branch
-//               and would be overwritten by the checkout, throw error.
-//             */
-//            if (cwdFiles.containsKey(filename) && !cwdFiles.get(filename).equals(fileId)) {
-//                throw error("There is an untracked file in the way; delete it, or add and commit it first.");
-//            }
-//        }
-        // Delete all files in CWD except untracked files, then write the blobs of the commit to CWD
+        /* Delete all files in CWD except untracked files,
+           then write the blobs of the commit to CWD
+         */
         for (String f : plainFilenamesIn(CWD)) {
             if (join(CWD, f).isFile() && !untrackedFiles.contains(f)) {
                 restrictedDelete(join(CWD, f));
@@ -528,7 +529,6 @@ public class Repository {
 
     /** Merge HEAD with BRANCH */
     public static void merge(String branch) {
-
         if (ADDED_DIR.listFiles().length != 0 || REMOVED_DIR.listFiles().length != 0) {
             throw error("You have uncommitted changes.");
         }
@@ -545,7 +545,8 @@ public class Repository {
         ArrayList<String> untrackedFiles = getUntrackedFiles();
         for (String untracked : untrackedFiles) {
             if (objCommit.blobs.containsKey(untracked)) {
-                throw error("There is an untracked file in the way; delete it, or add and commit it first.");
+                throw error("There is an untracked file in the way; " +
+                        "delete it, or add and commit it first.");
             }
         }
         Commit splitPoint = findSplitPoint(currCommit, objCommit);
@@ -600,7 +601,9 @@ public class Repository {
             } else {
                 // This file exists, but different version to the current commit.
                 if (!newBlobs.get(filename).equals(fileId)) {
-                    // split point version is the same as current commit, then change the version to object commit.
+                    /* split point version is the same as current commit,
+                       then change the version to object commit.
+                     */
                     if (splitPointBlobs.get(filename).equals(newBlobs.get(filename))) {
                         newBlobs.put(filename, fileId);
                     } else if (!splitPointBlobs.get(filename).equals(fileId)) {
@@ -618,7 +621,9 @@ public class Repository {
         newCommit.blobs = newBlobs;
         // Save the new commit.
         saveCommit(newCommit);
-        // Delete all files in CWD except untracked files, then write the untracked files and blobs of the commit to CWD
+        /* Delete all files in CWD except untracked files,
+           then write the untracked files and blobs of the commit to CWD
+         */
         for (String f : plainFilenamesIn(CWD)) {
             if (join(CWD, f).isFile() && !untrackedFiles.contains(f)) {
                 restrictedDelete(join(CWD, f));
@@ -651,10 +656,10 @@ public class Repository {
         }
         // Use BFS to traverse the ancestors of obj. Check if the commit is curr's ancestor
         HashSet<Commit> objAncestors = new HashSet<>();
-        LinkedQueue<Commit> bfsFringe = new LinkedQueue<>();
-        bfsFringe.enqueue(obj);
+        LinkedList<Commit> bfsFringe = new LinkedList<>();
+        bfsFringe.addFirst(obj);
         while (!bfsFringe.isEmpty()) {
-            Commit c = bfsFringe.dequeue();
+            Commit c = bfsFringe.removeLast();
             // Check if the commit is ancestor of curr
             for (Commit a : currAncestors) {
                 if (a.equals(c)) {
@@ -667,7 +672,7 @@ public class Repository {
             objAncestors.add(c);
             for (Commit adj : c.parents) {
                 if (!objAncestors.contains(adj)) {
-                    bfsFringe.enqueue(adj);
+                    bfsFringe.addFirst(adj);
                 }
             }
         }

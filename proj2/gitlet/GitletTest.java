@@ -7,15 +7,15 @@ import org.junit.Test;
 import static gitlet.Utils.*;
 import java.io.File;
 
-public class gitletTest {
-    public static final String TESTPATH = "C:\\Learning\\CS\\DataStructure\\cs61b\\cs61b-sp21\\proj2\\Unittest";
+public class GitletTest {
+    private static final String TESTPATH = "C:\\Learning\\CS\\DataStructure\\cs61b\\cs61b-sp21\\proj2\\Unittest";
 
-    public static File CWD;
+    private static File CWD;
 
-    public static void quickCreate(String filename) {
+    private static void quickCreate(String filename) {
         writeContents(join(CWD, filename), "filename" + "111\n");
     }
-    public static void addAndCommit(String filename) {
+    private static void addAndCommit(String filename) {
         addFile(filename);
         commit("add " + filename);
     }
@@ -62,6 +62,13 @@ public class gitletTest {
     public static void readCommit(File f) {
         Commit c = readObject(f, Commit.class);
         System.out.println(c.blobs.toString());
+    }
+
+    @Test
+    public void emptyCommitTest() {
+        clearTest();
+        initRepo();
+        commit("nothing commit");
     }
     @Test
     public void versionsCommitTest() {

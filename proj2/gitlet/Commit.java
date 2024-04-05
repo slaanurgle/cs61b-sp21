@@ -1,21 +1,17 @@
 package gitlet;
 
-// TODO: any imports you need here
-
 import java.io.Serializable;
 import java.util.*;
 
 import static gitlet.Utils.*;
 
 /** Represents a gitlet commit object.
- *  TODO: It's a good idea to give a description here of what else this Class
  *  does at a high level.
  *
- *  @author TODO
+ *  @author Slaanurgle
  */
 public class Commit implements Serializable {
     /**
-     * TODO: add instance variables here.
      *
      * List all instance variables of the Commit class here with a useful
      * comment above them describing what that variable represents and how that
@@ -58,10 +54,6 @@ public class Commit implements Serializable {
             return false;
         }
         Commit c = (Commit) o;
-//        if (message.equals(c.message) && date.equals(c.date) && parents.equals(c.parents) && blobs.equals(c.blobs)) {
-//            return true;
-//        }
-//        return false;
         return this.getID().equals(c.getID());
     }
 
@@ -105,7 +97,8 @@ public class Commit implements Serializable {
         }
         Formatter dateFormatter = new Formatter();
         // Format: Date: Thu Nov 9 17:01:33 2017 -0800
-        dateFormatter.format(Locale.US, "Date: %ta %tb %te %tT %tY %tz", date ,date, date, date, date, date);
+        dateFormatter.format(Locale.US, "Date: %ta %tb %te %tT %tY %tz",
+                date, date, date, date, date, date);
 
         System.out.println(dateFormatter);
         System.out.println(message);

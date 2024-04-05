@@ -1,28 +1,46 @@
 package gitlet;
 
+import java.util.List;
+import java.util.Arrays;
+
+
 import static gitlet.Utils.error;
 /** Driver class for Gitlet, a subset of the Git version-control system.
- *  @author TODO
+ *  @author Slaanurgle
  */
 public class Main {
 
     /** Usage: java gitlet.Main ARGS, where ARGS contains
      *  <COMMAND> <OPERAND1> <OPERAND2> ... 
      */
+    private static final List<String> COMMANDS = Arrays.asList
+            ("init", "add", "commit", "rm", "log", "global-log", "status", "checkout",
+                    "branch", "rm-branch", "reset", "merge");
+
+    private static void checkOperandNum(String[] args, int expectedNum) {
+        if (args.length != expectedNum + 1) {
+            throw error("Incorrect operands.");
+        }
+    }
+
     public static void main(String[] args) {
-        // TODO: what if args is empty?
         if (args.length == 0) {
             error("Please enter a command.");
         }
         String firstArg = args[0];
+        if (COMMANDS.contains(firstArg) && !firstArg.equals("init")) {
+            if (!Repository.hasGitlet()) {
+                throw error("Not in an initialized Gitlet directory.");
+            }
+        }
         switch(firstArg) {
             case "init":
-                // TODO: handle the `init` command
                 // initialize the repo
+                checkOperandNum(args, 0);
                 Repository.initRepo();
                 break;
             case "add":
-                // TODO: handle the `add [filename]` command
+                checkOperandNum(args, 1);
                 String filename = args[1];
                 Repository.addFile(filename);
                 break;
@@ -30,20 +48,25 @@ public class Main {
                 if (args.length == 1) {
                     error("Please enter a commit message.");
                 }
+                checkOperandNum(args, 1);
                 String message = args[1];
                 Repository.commit(message);
                 break;
             case "rm":
+                checkOperandNum(args, 1);
                 filename = args[1];
                 Repository.removeFile(filename);
                 break;
             case "log":
+                checkOperandNum(args, 0);
                 Repository.printLog();
                 break;
             case "global-log":
+                checkOperandNum(args, 0);
                 Repository.printGlobalLog();
                 break;
             case "status":
+                checkOperandNum(args, 0);
                 Repository.printStatus();
                 break;
             case "checkout":
@@ -68,20 +91,23 @@ public class Main {
                 }
                 break;
             case "branch":
+                checkOperandNum(args, 1);
                 Repository.createBranch(args[1]);
                 break;
             case "rm-branch":
+                checkOperandNum(args, 1);
                 Repository.removeBranch(args[1]);
                 break;
             case "reset":
+                checkOperandNum(args, 1);
                 Repository.reset(args[1]);
                 break;
             case "merge":
+                checkOperandNum(args, 1);
                 Repository.merge(args[1]);
                 break;
             default:
                 error("No command with that name exists.");
-            // TODO: FILL THE REST IN
 
         }
     }
