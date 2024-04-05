@@ -312,4 +312,104 @@ public class gitletTest {
     a.txt
 
      */
+
+    /** Tests below test the merge command */
+    @Test
+    public void mergeTest1() {
+        clearTest();
+        initRepo();
+        File fa = join(CWD, "a.txt");
+        writeContents(fa, "ver1");
+        addFile("a.txt");
+        commit("add ver1");
+        createBranch("brn1");
+        writeContents(fa, "ver2");
+        addFile("a.txt");
+        commit("add ver2");
+        checkoutBranch("master");
+        writeContents(fa, "ver3");
+        addFile("a.txt");
+        commit("add ver3");
+        merge("brn1");
+        printLog();
+    }
+
+    @Test
+    public void mergeTest2() {
+        clearTest();
+        initRepo();
+        File fa = join(CWD, "a.txt");
+        writeContents(fa, "ver1");
+        addFile("a.txt");
+        commit("add ver1");
+        createBranch("brn1");
+        writeContents(fa, "ver2");
+        addFile("a.txt");
+        commit("add ver2");
+        checkoutBranch("master");
+        merge("brn1");
+        printLog();
+    }
+
+    @Test
+    public void mergeTest3() {
+        clearTest();
+        initRepo();
+        File fa = join(CWD, "a.txt");
+        writeContents(fa, "ver1\n");
+        addFile("a.txt");
+        commit("add ver1");
+        createBranch("brn1");
+        writeContents(fa, "ver2\n");
+        addFile("a.txt");
+        commit("add ver2");
+        checkoutBranch("master");
+        removeFile("a.txt");
+        commit("remove");
+        merge("brn1");
+        printLog();
+    }
+
+    @Test
+    public void mergeTest4() {
+        clearTest();
+        initRepo();
+        File fa = join(CWD, "a.txt");
+        File fb = join(CWD, "b.txt");
+        writeContents(fa, "ver1\n");
+        addFile("a.txt");
+        writeContents(fb, "ver1");
+        addFile("b.txt");
+        commit("add a,b ver1");
+        createBranch("brn1");
+        writeContents(fa, "ver2\n");
+        addFile("a.txt");
+        removeFile("b.txt");
+        commit("add a ver2, remove b");
+        checkoutBranch("master");
+        removeFile("a.txt");
+        commit("remove a");
+        merge("brn1");
+        printLog();
+    }
+
+    @Test
+    public void mergeTest5() {
+        clearTest();
+        initRepo();
+        File fa = join(CWD, "a.txt");
+        File fb = join(CWD, "b.txt");
+        writeContents(fa, "ver1");
+        writeContents(fb, "ver1");
+        addFile("a.txt");
+        commit("add ver1");
+        createBranch("brn1");
+        writeContents(fa, "ver2");
+        writeContents(fb, "ver2");
+        addFile("a.txt");
+        commit("add ver2");
+        checkoutBranch("master");
+        merge("brn1");
+        printLog();
+    }
 }

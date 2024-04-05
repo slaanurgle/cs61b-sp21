@@ -36,6 +36,7 @@ public class Main {
             case "rm":
                 filename = args[1];
                 Repository.removeFile(filename);
+                break;
             case "log":
                 Repository.printLog();
                 break;
@@ -67,7 +68,6 @@ public class Main {
                 }
                 break;
             case "branch":
-
                 Repository.createBranch(args[1]);
                 break;
             case "rm-branch":
@@ -78,6 +78,7 @@ public class Main {
                 break;
             case "merge":
                 Repository.merge(args[1]);
+                break;
             default:
                 error("No command with that name exists.");
             // TODO: FILL THE REST IN

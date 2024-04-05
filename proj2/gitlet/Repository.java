@@ -3,6 +3,7 @@ package gitlet;
 import edu.princeton.cs.algs4.LinkedQueue;
 
 import java.io.File;
+import java.lang.reflect.Array;
 import java.util.*;
 
 import static gitlet.Utils.*;
@@ -455,8 +456,11 @@ public class Repository {
             }
         }
         // Check whether there are untracked file and would be overwritten.
-        if (!getUntrackedFiles().isEmpty()) {
-            throw error("There is an untracked file in the way; delete it, or add and commit it first.");
+        ArrayList<String> untrackedFiles = getUntrackedFiles();
+        for (String untracked : untrackedFiles) {
+            if (commit.blobs.containsKey(untracked)) {
+                throw error("There is an untracked file in the way; delete it, or add and commit it first.");
+            }
         }
 //        for (Map.Entry<String, String> entry : cwdFiles.entrySet()) {
 //            String filename = entry.getKey();
@@ -468,10 +472,10 @@ public class Repository {
 //                throw error("There is an untracked file in the way; delete it, or add and commit it first.");
 //            }
 //        }
-        // Delete all files in CWD, then write the blobs of the commit to CWD
-        for (File f : CWD.listFiles()) {
-            if (f.isFile()) {
-                restrictedDelete(f);
+        // Delete all files in CWD except untracked files, then write the blobs of the commit to CWD
+        for (String f : plainFilenamesIn(CWD)) {
+            if (join(CWD, f).isFile() && !untrackedFiles.contains(f)) {
+                restrictedDelete(join(CWD, f));
             }
         }
         // Write the blobs of the commit to CWD
@@ -538,7 +542,8 @@ public class Repository {
         Commit objCommit = getCommit(branch);
         TreeMap<String, String> newBlobs = new TreeMap<>(currCommit.blobs); // store the blobs of merged commit
         TreeMap<String, String> objBlobs = objCommit.blobs; // the blobs of objCommit.
-        for (String untracked : getUntrackedFiles()) {
+        ArrayList<String> untrackedFiles = getUntrackedFiles();
+        for (String untracked : untrackedFiles) {
             if (objCommit.blobs.containsKey(untracked)) {
                 throw error("There is an untracked file in the way; delete it, or add and commit it first.");
             }
@@ -557,6 +562,24 @@ public class Repository {
         String message = "Merged " + branch + " into " + getHead() + ".";
         Commit newCommit = new Commit(message);
         TreeMap<String, String> splitPointBlobs = splitPoint.blobs;
+        for (Map.Entry<String, String> entry : newBlobs.entrySet()) {
+            String filename = entry.getKey();
+            String fileId = entry.getValue();
+            if (objBlobs.get(filename) == null) {
+                if (splitPointBlobs.get(filename) != null) {
+                    if (splitPointBlobs.get(filename).equals(fileId)) {
+                        newBlobs.remove(filename);
+                    } else {
+                        // This file is present in split point but different version to curr commit.
+                        System.out.println("Encountered a merge conflict.");
+                        // Create conflict file
+                        File conflictFile = createConflictFile(filename, fileId, null);
+                        newBlobs.put(filename, sha1(filename + readContentsAsString(conflictFile)));
+                    }
+                }
+
+            }
+        }
         for (Map.Entry<String, String> entry : objBlobs.entrySet()) {
             String filename = entry.getKey();
             String fileId = entry.getValue();
@@ -574,33 +597,32 @@ public class Repository {
                     File conflictFile = createConflictFile(filename, null, fileId);
                     newBlobs.put(filename, sha1(filename + readContentsAsString(conflictFile)));
                 }
-            }
-            // This file exists, but different version to the current commit.
-            if (!newBlobs.get(filename).equals(fileId)) {
-                // split point version is the same as current commit, then change the version to object commit.
-                if (splitPointBlobs.get(filename).equals(newBlobs.get(filename))) {
-                    newBlobs.put(filename, fileId);
-                } else if (!splitPointBlobs.get(filename).equals(fileId)) {
-                    // split point version is different to both of them.
-                    System.out.println("Encountered a merge conflict.");
-                    // Create conflict file
-                    File conflictFile = createConflictFile(filename, null, fileId);
-                    newBlobs.put(filename, sha1(filename + readContentsAsString(conflictFile)));
+            } else {
+                // This file exists, but different version to the current commit.
+                if (!newBlobs.get(filename).equals(fileId)) {
+                    // split point version is the same as current commit, then change the version to object commit.
+                    if (splitPointBlobs.get(filename).equals(newBlobs.get(filename))) {
+                        newBlobs.put(filename, fileId);
+                    } else if (!splitPointBlobs.get(filename).equals(fileId)) {
+                        // split point version is different to both of them.
+                        System.out.println("Encountered a merge conflict.");
+                        // Create conflict file
+                        File conflictFile = createConflictFile(filename, null, fileId);
+                        newBlobs.put(filename, sha1(filename + readContentsAsString(conflictFile)));
+                    }
                 }
             }
         }
         newCommit.parents.add(0, currCommit);
         newCommit.parents.add(1, objCommit);
         newCommit.blobs = newBlobs;
-        // Delete all files in CWD, then write the untracked files and blobs of the commit to CWD
-        for (File f : CWD.listFiles()) {
-            if (f.isFile()) {
-                restrictedDelete(f);
+        // Save the new commit.
+        saveCommit(newCommit);
+        // Delete all files in CWD except untracked files, then write the untracked files and blobs of the commit to CWD
+        for (String f : plainFilenamesIn(CWD)) {
+            if (join(CWD, f).isFile() && !untrackedFiles.contains(f)) {
+                restrictedDelete(join(CWD, f));
             }
-        }
-        // Write untracked files to CWD.
-        for (String f : getUntrackedFiles()) {
-            writeContents(join(CWD, f));
         }
         // Write the blobs of the commit to CWD
         for (Map.Entry<String, String> entry : newCommit.blobs.entrySet()) {
@@ -634,9 +656,15 @@ public class Repository {
         while (!bfsFringe.isEmpty()) {
             Commit c = bfsFringe.dequeue();
             // Check if the commit is ancestor of curr
-            if (currAncestors.contains(c)) {
-                return c;
+            for (Commit a : currAncestors) {
+                if (a.equals(c)) {
+                    return c;
+                }
             }
+//            if (currAncestors.contains(c)) {
+//                return c;
+//            }
+            objAncestors.add(c);
             for (Commit adj : c.parents) {
                 if (!objAncestors.contains(adj)) {
                     bfsFringe.enqueue(adj);

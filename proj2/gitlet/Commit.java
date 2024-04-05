@@ -58,7 +58,16 @@ public class Commit implements Serializable {
             return false;
         }
         Commit c = (Commit) o;
+//        if (message.equals(c.message) && date.equals(c.date) && parents.equals(c.parents) && blobs.equals(c.blobs)) {
+//            return true;
+//        }
+//        return false;
         return this.getID().equals(c.getID());
+    }
+
+    @Override
+    public int hashCode() {
+        return getID().hashCode();
     }
 
 //    /** return whether two commit has equal blobs */
@@ -88,7 +97,7 @@ public class Commit implements Serializable {
         System.out.println(id);
         if (parents.size() == 2) {
             String firstParent = parents.get(0).getID().toString().substring(0, 7);
-            String secondParent = parents.get(0).getID().toString().substring(0, 7);
+            String secondParent = parents.get(1).getID().toString().substring(0, 7);
             System.out.print("Merge: ");
             System.out.print(firstParent);
             System.out.print(" ");
