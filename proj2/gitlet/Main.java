@@ -72,6 +72,12 @@ public class Main {
                 break;
             case "rm-branch":
                 Repository.removeBranch(args[1]);
+                break;
+            case "reset":
+                Repository.reset(args[1]);
+                break;
+            case "merge":
+                Repository.merge(args[1]);
             default:
                 error("No command with that name exists.");
             // TODO: FILL THE REST IN

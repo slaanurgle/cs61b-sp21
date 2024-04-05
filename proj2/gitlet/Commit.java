@@ -48,6 +48,26 @@ public class Commit implements Serializable {
         this.blobs = new TreeMap<>();
         this.parents = new LinkedList<>();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Commit c = (Commit) o;
+        return this.getID().equals(c.getID());
+    }
+
+//    /** return whether two commit has equal blobs */
+//    public boolean equalBlobs(Commit c) {
+//        if (this.blobs.size() != c.blobs.size()) {
+//            return false;
+//        }
+//        for ()
+//    }
     /** get the commit id */
     public String getID() {
         return sha1(serialize(this));

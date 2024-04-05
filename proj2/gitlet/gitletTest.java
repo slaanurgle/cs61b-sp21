@@ -4,7 +4,6 @@ package gitlet;
 
 import static gitlet.Repository.*;
 import org.junit.Test;
-
 import static gitlet.Utils.*;
 import java.io.File;
 
@@ -129,10 +128,11 @@ public class gitletTest {
         writeContents(f1, "a\n");
         Repository.addFile("a.txt");
         Repository.commit("a.txt back to initial");
-        printLog();
         checkoutFile("a.txt");
+        printLog();
         //Repository.printGlobalLog();
     }
+    /** Tests belows test the branch command and rm-branch command */
     @Test
     public void branchesTest() {
         clearTest();
@@ -149,4 +149,167 @@ public class gitletTest {
         printLog();
         printStatus();
     }
+
+    @Test
+    public void rmBranchTest() {
+        clearTest();
+        initRepo();
+        File fa = join(CWD, "a.txt");
+        writeContents(fa, "ver1");
+        addAndCommit("a.txt");
+        createBranch("brn1");
+        writeContents(fa, "ver2");
+        addAndCommit("a.txt");
+        printStatus();
+        removeBranch("master");
+        printStatus();
+    }
+    /** The tests belows test status command */
+    @Test
+    public void modifiedTest1() {
+        clearTest();
+        initRepo();
+        File fa = join(CWD, "a.txt");
+        writeContents(fa, "ver1");
+        addAndCommit("a.txt");
+        writeContents(fa, "ver2");
+        printStatus();
+
+    }
+    /* expected output:
+    === Branches ===
+    *master
+
+    === Staged Files ===
+
+    === Removed Files ===
+
+    === Modifications Not Staged For Commit ===
+    a.txt (modified)
+     */
+
+    @Test
+    public void modifiedTest2() {
+        clearTest();
+        initRepo();
+        File fa = join(CWD, "a.txt");
+        writeContents(fa, "ver1");
+        addAndCommit("a.txt");
+        writeContents(fa, "ver2");
+        addFile("a.txt");
+        writeContents(fa, "ver1");
+        printStatus();
+    }
+    /* expected output:
+    === Branches ===
+    *master
+
+    === Staged Files ===
+
+    === Removed Files ===
+
+    === Modifications Not Staged For Commit ===
+    a.txt (modified)
+     */
+
+    @Test
+    public void modifiedTest3() {
+        clearTest();
+        initRepo();
+        File fa = join(CWD, "a.txt");
+        writeContents(fa, "ver1");
+        addAndCommit("a.txt");
+        writeContents(fa, "ver2");
+        addFile("a.txt");
+        restrictedDelete(fa);
+        printStatus();
+    }
+    /* expected output:
+    === Branches ===
+    *master
+
+    === Staged Files ===
+
+    === Removed Files ===
+
+    === Modifications Not Staged For Commit ===
+    a.txt (deleted)
+     */
+    @Test
+    public void modifiedTest4() {
+        clearTest();
+        initRepo();
+        File fa = join(CWD, "a.txt");
+        writeContents(fa, "ver1");
+        addAndCommit("a.txt");
+        writeContents(fa, "ver2");
+        restrictedDelete(fa);
+        printStatus();
+    }
+    /* expected output:
+    === Branches ===
+    *master
+
+    === Staged Files ===
+
+    === Removed Files ===
+
+    === Modifications Not Staged For Commit ===
+    a.txt (deleted)
+     */
+
+    @Test
+    public void untrackedTest1() {
+        clearTest();
+        initRepo();
+        quickCreate("a.txt");
+        quickCreate("b.txt");
+        addFile("a.txt");
+        addFile("b.txt");
+        commit("add a, b");
+        quickCreate("c.txt");
+        quickCreate("d.txt");
+        printStatus();
+    }
+    /* expected output:
+    === Branches ===
+    *master
+
+    === Staged Files ===
+
+    === Removed Files ===
+
+    === Modifications Not Staged For Commit ===
+
+    === Untracked Files ===
+    c.txt
+    d.txt
+
+     */
+
+    @Test
+    public void untrackedTest2() {
+        clearTest();
+        initRepo();
+        quickCreate("a.txt");
+        addAndCommit("a.txt");
+        removeFile("a.txt");
+        File fa = join(CWD, "a.txt");
+        writeContents(fa, "ver1");
+        printStatus();
+    }
+    /* expected output:
+    === Branches ===
+    *master
+
+    === Staged Files ===
+
+    === Removed Files ===
+
+    === Modifications Not Staged For Commit ===
+
+    === Untracked Files ===
+    a.txt
+
+     */
 }

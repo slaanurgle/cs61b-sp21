@@ -67,7 +67,13 @@ File id: the file id are compute using **the sha1 code of `String filename + Str
      - If the CWD has the file, but different version to HEAD:
        - the CWD version is staged: print in Staged Files
        - the CWD version is not staged: print in Modifications Not Staged
-8. 
+8.  `merge(String branch)`: Merge HEAD with BRANCH
+   - find the (latest) split point. 
+     - If BRANCH is split point, do nothing, then print `Given branch is an ancestor of the current branch.`.
+   - The cases below may modified untracked file. So untracked files should be checked first.
+     - If HEAD is split point, then checkout to BRANCH, print `Current branch fast-forwarded.`
+     - If is the other cases:
+       1. 
 
 
 ## Algorithms
