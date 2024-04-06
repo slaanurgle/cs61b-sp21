@@ -81,7 +81,7 @@ public class Commit implements Serializable {
         Repository.saveCommit(c);
     }
 
-    public void printInfo() {
+    public void printInfoWithoutMessage() {
         String id = this.getID();
         System.out.println("===");
         System.out.print("commit ");
@@ -100,6 +100,9 @@ public class Commit implements Serializable {
                 date, date, date, date, date, date);
 
         System.out.println(dateFormatter);
+    }
+    public void printInfo() {
+        printInfoWithoutMessage();
         System.out.println(message);
         System.out.println();
     }

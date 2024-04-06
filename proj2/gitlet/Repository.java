@@ -260,7 +260,7 @@ public class Repository {
         for (String commitId : plainFilenamesIn(COMMITS_DIR)) {
             Commit commit = readObject(join(COMMITS_DIR, commitId), Commit.class);
             if (commit.message.equals(message)) {
-                commit.printInfo();
+                commit.printInfoWithoutMessage();
                 commitFound = true;
             }
         }
@@ -510,7 +510,7 @@ public class Repository {
             printError("A branch with that name does not exist.");
         }
         String head = getHead();
-        if (head.equals(branch) && branch.equals("HEAD")) {
+        if (head.equals(branch) || branch.equals("HEAD")) {
             printError("Cannot remove the current branch.");
         }
         fBranch.delete();

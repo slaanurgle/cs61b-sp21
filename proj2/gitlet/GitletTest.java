@@ -420,4 +420,19 @@ public class GitletTest {
         merge("brn1");
         printLog();
     }
+
+    @Test
+    public void rmBranchTest2() {
+        clearTest();
+        initRepo();
+        createBranch("other");
+        checkoutBranch("other");
+        File fa = join(CWD, "f.txt");
+        writeContents(fa, "ver1");
+        addAndCommit("f.txt");
+        //removeBranch("other");
+        System.out.println(getHead());
+        //printStatus();
+        //removeBranch("foo");
+    }
 }
