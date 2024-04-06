@@ -49,6 +49,9 @@ public class Main {
                     printError("Please enter a commit message.");
                 }
                 checkOperandNum(args, 1);
+                if (args[1].equals("")) {
+                    printError("Please enter a commit message.");
+                }
                 String message = args[1];
                 Repository.commit(message);
                 break;
@@ -64,6 +67,10 @@ public class Main {
             case "global-log":
                 checkOperandNum(args, 0);
                 Repository.printGlobalLog();
+                break;
+            case "find":
+                checkOperandNum(args, 1);
+                Repository.findCommits(args[1]);
                 break;
             case "status":
                 checkOperandNum(args, 0);

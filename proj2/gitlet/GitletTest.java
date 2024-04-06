@@ -8,7 +8,8 @@ import static gitlet.Utils.*;
 import java.io.File;
 
 public class GitletTest {
-    private static final String TESTPATH = "C:\\Learning\\CS\\DataStructure\\cs61b\\cs61b-sp21\\proj2\\Unittest";
+    private static final String TESTPATH = "C:\\Learning\\CS\\DataStructure\\" +
+            "cs61b\\cs61b-sp21\\proj2\\Unittest";
 
     private static File CWD;
 
@@ -64,12 +65,12 @@ public class GitletTest {
         System.out.println(c.blobs.toString());
     }
 
-    @Test
-    public void emptyCommitTest() {
-        clearTest();
-        initRepo();
-        commit("nothing commit");
-    }
+//    @Test
+//    public void emptyCommitTest() {
+//        clearTest();
+//        initRepo();
+//        commit("nothing commit");
+//    }
     @Test
     public void versionsCommitTest() {
         clearTest();

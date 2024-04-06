@@ -31,7 +31,6 @@ public class Repository {
     public static final File BRANCHES_DIR = join(GITLET_DIR, "branches");
     public static final File HEAD = join(BRANCHES_DIR, "HEAD");
 
-    /* TODO: fill in the rest of this class. */
     /** Remove the .gitlet folder */
     public static void clearRepo() {
         if (GITLET_DIR.exists()) {
@@ -142,8 +141,8 @@ public class Repository {
     public static void initRepo() {
         // check whether .gitlet is already exists.
         if (GITLET_DIR.exists()) {
-            printError("A Gitlet version-control system " +
-                    "already exists in the current directory.");
+            printError("A Gitlet version-control system "
+                    + "already exists in the current directory.");
         }
         // create the directories of the repo
         GITLET_DIR.mkdir();
@@ -195,8 +194,8 @@ public class Repository {
             safetyCreate(fRemove);
         } else {
             // The removed file is not tracked.
-            // Check CWD, if the file does not exist, throw error.
-            if (!fIn.exists()) {
+            // Check CWD, if the file is not tracked and not staged, throw error.
+            if (!isTracked(filename)) {
                 printError("No reason to remove the file.");
             }
             fAdd.delete();
@@ -391,7 +390,7 @@ public class Repository {
         }
         return cwdFiles;
     }
-    /** Get untracked files */
+    /** Get untracked files (also unstaged) */
     private static ArrayList<String> getUntrackedFiles() {
         ArrayList<String> untracked = new ArrayList<>();
         HashMap<String, String> cwdFiles = getCWDFiles();
@@ -414,7 +413,7 @@ public class Repository {
         }
         return untracked;
     }
-    /** Return whether a file is an untracked file */
+    /** Return whether a file is an untracked and unstaged file */
     public static boolean isTracked(String filename) {
         return !getUntrackedFiles().contains(filename);
     }
@@ -502,7 +501,6 @@ public class Repository {
         }
         String commitId = getId("HEAD");
         writeContents(fBranch, commitId);
-        setHead(newBranch);
     }
 
     /** Remove branch */
@@ -540,13 +538,15 @@ public class Repository {
         }
         Commit currCommit = getCommit("HEAD");
         Commit objCommit = getCommit(branch);
-        TreeMap<String, String> newBlobs = new TreeMap<>(currCommit.blobs); // store the blobs of merged commit
-        TreeMap<String, String> objBlobs = objCommit.blobs; // the blobs of objCommit.
+        // store the blobs of merged commit
+        TreeMap<String, String> newBlobs = new TreeMap<>(currCommit.blobs);
+        // Store the blobs of objCommit.
+        TreeMap<String, String> objBlobs = objCommit.blobs;
         ArrayList<String> untrackedFiles = getUntrackedFiles();
         for (String untracked : untrackedFiles) {
             if (objCommit.blobs.containsKey(untracked)) {
-                printError("There is an untracked file in the way; " +
-                        "delete it, or add and commit it first.");
+                printError("There is an untracked file in the way; "
+                        + "delete it, or add and commit it first.");
             }
         }
         Commit splitPoint = findSplitPoint(currCommit, objCommit);

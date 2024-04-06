@@ -28,7 +28,6 @@ public class Commit implements Serializable {
      *  TreeMap maps the file name to file id. */
     TreeMap<String, String> blobs; //
 
-    /* TODO: fill in the rest of this class. */
     /* constructors */
     public Commit() {
         this("initial commit", new Date(0));
