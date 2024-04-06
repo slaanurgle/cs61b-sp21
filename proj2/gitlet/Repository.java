@@ -702,7 +702,7 @@ public class Repository {
         sb.append(currContents);
         sb.append("=======\n");
         sb.append(objContents);
-        sb.append(">>>>>>>");
+        sb.append(">>>>>>>\n");
         String newContents = sb.toString();
         String newFileId = sha1(filename + newContents);
         File newFile = join(BLOBS_DIR, newFileId);

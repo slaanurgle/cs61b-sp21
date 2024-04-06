@@ -83,7 +83,6 @@ public class Commit implements Serializable {
 
     public void printInfoWithoutMessage() {
         String id = this.getID();
-        System.out.println("===");
         System.out.print("commit ");
         System.out.println(id);
         if (parents.size() == 2) {
@@ -102,6 +101,7 @@ public class Commit implements Serializable {
         System.out.println(dateFormatter);
     }
     public void printInfo() {
+        System.out.println("===");
         printInfoWithoutMessage();
         System.out.println(message);
         System.out.println();
