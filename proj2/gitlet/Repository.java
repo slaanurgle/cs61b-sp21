@@ -142,8 +142,8 @@ public class Repository {
     public static void initRepo() {
         // check whether .gitlet is already exists.
         if (GITLET_DIR.exists()) {
-            throw error("A Gitlet version-control system " +
-                    "already exists in the current directory.\n");
+            printError("A Gitlet version-control system " +
+                    "already exists in the current directory.");
         }
         // create the directories of the repo
         GITLET_DIR.mkdir();
@@ -162,7 +162,7 @@ public class Repository {
     public static void addFile(String filename) {
         File fIn = join(CWD, filename);
         if (!fIn.exists()) {
-            throw error("File does not exist.");
+            printError("File does not exist.");
         }
         File fAdd = join(ADDED_DIR, filename);
         File fRemove = join(REMOVED_DIR, filename);
@@ -197,7 +197,7 @@ public class Repository {
             // The removed file is not tracked.
             // Check CWD, if the file does not exist, throw error.
             if (!fIn.exists()) {
-                throw error("No reason to remove the file.");
+                printError("No reason to remove the file.");
             }
             fAdd.delete();
             fRemove.delete();
@@ -211,7 +211,7 @@ public class Repository {
         newCommit.blobs = new TreeMap<String, String>(head.blobs);
         // Check if there exists staged files
         if (isEmptyFolder(ADDED_DIR) && isEmptyFolder(REMOVED_DIR)) {
-            throw error("No changes added to the commit.\n");
+            printError("No changes added to the commit.");
         }
         // add the staged files
         for (String addFilename : plainFilenamesIn(ADDED_DIR)) {
@@ -266,7 +266,7 @@ public class Repository {
             }
         }
         if (!commitFound) {
-            throw error("Found no commit with that message.");
+            printError("Found no commit with that message.");
         }
     }
 
@@ -427,11 +427,11 @@ public class Repository {
         // Move the file of the commit id to CWD.
         Commit commit = toCommit(commitId.substring(0, 6));
         if (commit == null) {
-            throw error("No commit with that id exists.");
+            printError("No commit with that id exists.");
         }
         String blobid = commit.blobs.get(filename);
         if (blobid == null) {
-            throw error("File does not exist in that commit.");
+            printError("File does not exist in that commit.");
         }
         String contents = readContentsAsString(join(BLOBS_DIR, blobid));
         writeContents(join(CWD, filename), contents);
@@ -440,10 +440,10 @@ public class Repository {
     /** Checkout to BRANCH */
     public static void checkoutBranch(String branch) {
         if (!isBranch(branch)) {
-            throw error("No such branch exists.");
+            printError("No such branch exists.");
         }
         if (branch.equals(getHead())) {
-            throw error("No need to checkout the current branch.");
+            printError("No need to checkout the current branch.");
         }
         String commitId = getId(branch);
         checkoutCommit(commitId);
@@ -467,7 +467,7 @@ public class Repository {
         ArrayList<String> untrackedFiles = getUntrackedFiles();
         for (String untracked : untrackedFiles) {
             if (commit.blobs.containsKey(untracked)) {
-                throw error("There is an untracked file in the way; delete it, " +
+                printError("There is an untracked file in the way; delete it, " +
                         "or add and commit it first.");
             }
         }
@@ -498,7 +498,7 @@ public class Repository {
     public static void createBranch(String newBranch) {
         File fBranch = join(BRANCHES_DIR, newBranch);
         if (fBranch.exists()) {
-            throw error("A branch with that name already exists.");
+            printError("A branch with that name already exists.");
         }
         String commitId = getId("HEAD");
         writeContents(fBranch, commitId);
@@ -509,11 +509,11 @@ public class Repository {
     public static void removeBranch(String branch) {
         File fBranch = join(BRANCHES_DIR, branch);
         if (!fBranch.exists()) {
-            throw error("A branch with that name does not exist.");
+            printError("A branch with that name does not exist.");
         }
         String head = getHead();
         if (head.equals(branch) && branch.equals("HEAD")) {
-            throw error("Cannot remove the current branch.");
+            printError("Cannot remove the current branch.");
         }
         fBranch.delete();
     }
@@ -522,7 +522,7 @@ public class Repository {
     public static void reset(String commitId) {
         Commit commit = toCommit(commitId);
         if (commit == null) {
-            throw error("No commit with that id exists.");
+            printError("No commit with that id exists.");
         }
         checkoutCommit(commitId);
     }
@@ -530,13 +530,13 @@ public class Repository {
     /** Merge HEAD with BRANCH */
     public static void merge(String branch) {
         if (ADDED_DIR.listFiles().length != 0 || REMOVED_DIR.listFiles().length != 0) {
-            throw error("You have uncommitted changes.");
+            printError("You have uncommitted changes.");
         }
         if (!join(BRANCHES_DIR, branch).exists()) {
-            throw error("A branch with that name does not exist.");
+            printError("A branch with that name does not exist.");
         }
         if (branch.equals("HEAD") || branch.equals(getHead())) {
-            throw error("Cannot merge a branch with itself.");
+            printError("Cannot merge a branch with itself.");
         }
         Commit currCommit = getCommit("HEAD");
         Commit objCommit = getCommit(branch);
@@ -545,7 +545,7 @@ public class Repository {
         ArrayList<String> untrackedFiles = getUntrackedFiles();
         for (String untracked : untrackedFiles) {
             if (objCommit.blobs.containsKey(untracked)) {
-                throw error("There is an untracked file in the way; " +
+                printError("There is an untracked file in the way; " +
                         "delete it, or add and commit it first.");
             }
         }

@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Arrays;
 
 
-import static gitlet.Utils.error;
+import static gitlet.Utils.printError;
 /** Driver class for Gitlet, a subset of the Git version-control system.
  *  @author Slaanurgle
  */
@@ -19,18 +19,18 @@ public class Main {
 
     private static void checkOperandNum(String[] args, int expectedNum) {
         if (args.length != expectedNum + 1) {
-            throw error("Incorrect operands.");
+            printError("Incorrect operands.");
         }
     }
 
     public static void main(String[] args) {
         if (args.length == 0) {
-            error("Please enter a command.");
+            printError("Please enter a command.");
         }
         String firstArg = args[0];
         if (COMMANDS.contains(firstArg) && !firstArg.equals("init")) {
             if (!Repository.hasGitlet()) {
-                throw error("Not in an initialized Gitlet directory.");
+                printError("Not in an initialized Gitlet directory.");
             }
         }
         switch(firstArg) {
@@ -46,7 +46,7 @@ public class Main {
                 break;
             case "commit":
                 if (args.length == 1) {
-                    error("Please enter a commit message.");
+                    printError("Please enter a commit message.");
                 }
                 checkOperandNum(args, 1);
                 String message = args[1];
@@ -76,18 +76,18 @@ public class Main {
                         break;
                     case 3:
                         if (!args[1].equals("--")) {
-                            throw error("Incorrect operands.");
+                            printError("Incorrect operands.");
                         }
                         Repository.checkoutFile(args[2]);
                         break;
                     case 4:
                         if (!args[2].equals("--")) {
-                            throw error("Incorrect operands.");
+                            printError("Incorrect operands.");
                         }
                         Repository.checkoutFile(args[1], args[3]);
                         break;
                     default:
-                        throw error("Incorrect operands.");
+                        printError("Incorrect operands.");
                 }
                 break;
             case "branch":
@@ -107,7 +107,7 @@ public class Main {
                 Repository.merge(args[1]);
                 break;
             default:
-                error("No command with that name exists.");
+                printError("No command with that name exists.");
 
         }
     }

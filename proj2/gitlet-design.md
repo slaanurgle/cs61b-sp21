@@ -72,8 +72,14 @@ File id: the file id are compute using **the sha1 code of `String filename + Str
      - If BRANCH is split point, do nothing, then print `Given branch is an ancestor of the current branch.`.
    - The cases below may modified untracked file. So untracked files should be checked first.
      - If HEAD is split point, then checkout to BRANCH, print `Current branch fast-forwarded.`
-     - If is the other cases:
-       1. 
+     - If is the other cases: For each file, assume that the split point is ver A, current branch is verB, given branch is verC. **caution: there may be new-created files or removed files in verB and verC.**
+       - If A=B but A!=C, these file update to verC
+       - If A=C but A!=B, these file update to verB
+       - If A!=B but B=C, these file update to verB(C)
+         - **If a file was removed in B and C, present in A, but present in CWD, keep it  present and untracked and unstaged.**
+       - If not present in A, C, present in B. These should be kept.
+       - If not present in A, B, present in C. These should be kept.
+       - B,C both modified A, these are **in conflict**. Then modify the contents of conflicting files.
 
 
 ## Algorithms
