@@ -261,6 +261,7 @@ public class Repository {
             Commit commit = readObject(join(COMMITS_DIR, commitId), Commit.class);
             if (commit.message.equals(message)) {
                 commit.printInfoWithoutMessage();
+                System.out.println();
                 commitFound = true;
             }
         }
@@ -616,7 +617,7 @@ public class Repository {
                         // split point version is different to both of them.
                         System.out.println("Encountered a merge conflict.");
                         // Create conflict file
-                        File conflictFile = createConflictFile(filename, null, fileId);
+                        File conflictFile = createConflictFile(filename, currId, fileId);
                         newBlobs.put(filename, sha1(filename + readContentsAsString(conflictFile)));
                     }
                 }

@@ -97,7 +97,6 @@ public class Commit implements Serializable {
         // Format: Date: Thu Nov 9 17:01:33 2017 -0800
         dateFormatter.format(Locale.US, "Date: %ta %tb %te %tT %tY %tz",
                 date, date, date, date, date, date);
-
         System.out.println(dateFormatter);
     }
     public void printInfo() {

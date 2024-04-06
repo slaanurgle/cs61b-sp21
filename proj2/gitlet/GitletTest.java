@@ -334,11 +334,11 @@ public class GitletTest {
         writeContents(fa, "ver2");
         addFile("a.txt");
         commit("add ver2");
-        checkoutBranch("master");
+        checkoutBranch("brn1");
         writeContents(fa, "ver3");
         addFile("a.txt");
         commit("add ver3");
-        merge("brn1");
+        merge("master");
         printLog();
     }
 
@@ -434,5 +434,27 @@ public class GitletTest {
         System.out.println(getHead());
         //printStatus();
         //removeBranch("foo");
+    }
+
+    @Test
+    public void findTest2() {
+        clearTest();
+        initRepo();
+        File fa = join(CWD, "a.txt");
+        File fb = join(CWD, "b.txt");
+        writeContents(fa, "a\n");
+        writeContents(fb, "b\n");
+        addFile("a.txt");
+        addFile("b.txt");
+        commit("Two files");
+        removeFile("a.txt");
+        commit("Remove one file");
+        writeContents(fa, "b\n");
+        addFile("a.txt");
+        commit("Two files");
+        printLog();
+        findCommits("Two files");
+        findCommits("initial commit");
+        findCommits("Remove one file");
     }
 }
