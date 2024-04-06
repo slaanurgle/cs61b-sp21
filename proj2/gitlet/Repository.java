@@ -523,6 +523,7 @@ public class Repository {
             printError("No commit with that id exists.");
         }
         checkoutCommit(commitId);
+        setBranch(getHead(), commit);
     }
 
     /** Merge HEAD with BRANCH */
@@ -563,24 +564,29 @@ public class Repository {
         String message = "Merged " + branch + " into " + getHead() + ".";
         Commit newCommit = new Commit(message);
         TreeMap<String, String> splitPointBlobs = splitPoint.blobs;
-        for (Map.Entry<String, String> entry : newBlobs.entrySet()) {
+        /* Use iterator to iterate because we need to remove */
+        Iterator<Map.Entry<String, String>> iterator = newBlobs.entrySet().iterator();
+        TreeMap<String, String> toAdd = new TreeMap<>();
+        while (iterator.hasNext()) {
+            Map.Entry<String, String> entry = iterator.next();
             String filename = entry.getKey();
             String fileId = entry.getValue();
             if (objBlobs.get(filename) == null) {
                 if (splitPointBlobs.get(filename) != null) {
                     if (splitPointBlobs.get(filename).equals(fileId)) {
-                        newBlobs.remove(filename);
+                        iterator.remove();
                     } else {
                         // This file is present in split point but different version to curr commit.
                         System.out.println("Encountered a merge conflict.");
                         // Create conflict file
                         File conflictFile = createConflictFile(filename, fileId, null);
-                        newBlobs.put(filename, sha1(filename + readContentsAsString(conflictFile)));
+                        toAdd.put(filename, sha1(filename + readContentsAsString(conflictFile)));
                     }
                 }
 
             }
         }
+        newBlobs.putAll(toAdd);
         for (Map.Entry<String, String> entry : objBlobs.entrySet()) {
             String filename = entry.getKey();
             String fileId = entry.getValue();
