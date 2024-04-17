@@ -2,18 +2,35 @@ package byow.Core;
 
 import byow.TileEngine.TERenderer;
 import byow.TileEngine.TETile;
+import edu.princeton.cs.introcs.StdDraw;
+
+import java.awt.*;
+import java.util.LinkedList;
 
 public class Engine {
     TERenderer ter = new TERenderer();
     /* Feel free to change the width and height. */
+    public static final String GAMENAME = "CS61B: THE GAME";
     public static final int WIDTH = 80;
     public static final int HEIGHT = 30;
-
+    /* The game Conditions */
+    private static final int MENU = 1;
+    private static final int WORLD = 2;
+    /** Current game condition */
+    public int gameCond;
+    private StartGUI starter;
+    private LinkedList<Character> keyBuffer = new LinkedList<>();
     /**
      * Method used for exploring a fresh world. This method should handle all inputs,
      * including inputs from the main menu.
      */
     public void interactWithKeyboard() {
+        initialGame();
+        while (StdDraw.hasNextKeyTyped()) {
+            char ch = StdDraw.nextKeyTyped();
+            interactWithChar(ch);
+        }
+
     }
 
     /**
@@ -45,8 +62,48 @@ public class Engine {
         //
         // See proj3.byow.InputDemo for a demo of how you can make a nice clean interface
         // that works for many different input types.
-
         TETile[][] finalWorldFrame = null;
+        initialGame();
+        for (Character c : input.toCharArray()) {
+            keyBuffer.addLast(c);
+        }
+        while (hasKeyBuffer()) {
+            char c = nextKey();
+            interactWithChar(c);
+        }
         return finalWorldFrame;
+    }
+
+    /** Helper method to deal with the characters of keyboard input or strings */
+    private TETile[][] interactWithChar(char ch) {
+        ch = Character.toUpperCase(ch);
+        switch(gameCond) {
+            case MENU:
+                starter.inputOption(ch);
+                break;
+            case WORLD:
+
+                break;
+        }
+        return null;
+    }
+
+    /** Initialize the game, set some variables and prepare the canvas */
+    private void initialGame() {
+        StdDraw.setCanvasSize(WIDTH * 16, HEIGHT * 16);
+        StdDraw.setXscale(0, WIDTH);
+        StdDraw.setYscale(0, HEIGHT);
+        StdDraw.clear(Color.BLACK);
+        StdDraw.enableDoubleBuffering();
+        starter = new StartGUI();
+        gameCond = MENU;
+    }
+
+    private boolean hasKeyBuffer() {
+        return !keyBuffer.isEmpty();
+    }
+
+    private char nextKey() {
+        return keyBuffer.removeFirst();
     }
 }
