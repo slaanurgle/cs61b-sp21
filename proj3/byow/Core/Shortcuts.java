@@ -9,5 +9,6 @@ public class Shortcuts {
     public static final char MOVELEFT = 'A';
     public static final char MOVEDOWN = 'S';
     public static final char MOVERIGHT = 'D';
+    public static final char EXITCOMMAND = ':';
 
 }

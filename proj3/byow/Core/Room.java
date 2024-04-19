@@ -12,12 +12,13 @@ public class Room {
     public int height;
     public int xloc;
     public int yloc;
+    public HashMap<Pos, Integer> walls;
     public static final int EDGE = 0;
     public static final int SOUTH = 1;
     public static final int NORTH = 2;
     public static final int EAST = 3;
     public static final int WEST = 4;
-    public HashMap<Pos, Integer> walls;
+
     public Room(int w, int h, int x, int y) {
         width = w;
         height = h;

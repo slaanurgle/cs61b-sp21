@@ -11,9 +11,10 @@ import java.util.*;
 import static byow.Core.RandomUtils.*;
 
 public class World implements Serializable {
-    TERenderer ter = new TERenderer();
+    public TERenderer ter = new TERenderer();
     public Random rand;
     public TETile[][] worldTiles;
+    public Unit avatar;
     public transient HashSet<Room> rooms;
     public static final int ROOMNUM = 20;
     public static final int DOORNUM = 2;
@@ -30,8 +31,9 @@ public class World implements Serializable {
             }
         }
         createWorld();
+        avatar = new Unit(this);
         renderWorld();
-        StdDraw.pause(1000000); // TODO: delete this after finishing.
+
     }
 
 
@@ -90,7 +92,7 @@ public class World implements Serializable {
             }
         }
     }
-    private void renderWorld() {
+    public void renderWorld() {
         StdDraw.clear(StdDraw.BLACK);
         ter.renderFrame(worldTiles);
     }
@@ -152,6 +154,19 @@ public class World implements Serializable {
         return cnt == 1;
     }
 
+    public Pos[] getFloorTiles() {
+        LinkedList<Pos> floorTiles = new LinkedList<>();
+        for (int i = 0; i < Engine.WIDTH; i += 1) {
+            for (int j = 0; j < Engine.HEIGHT; j += 1) {
+                TETile tile = worldTiles[i][j];
+                if (tile.equals(Tileset.FLOOR)) {
+                    floorTiles.addLast(new Pos(i, j));
+                }
+            }
+        }
+        Pos[] returnVal = floorTiles.toArray(new Pos[0]);
+        return returnVal;
+    }
 
     /** Use DFS to create a random hallway from worldTiles[X][Y] */
     private void generateHallway(int x, int y) {

@@ -23,6 +23,7 @@ public class Engine {
     /** Current game condition */
     public int gameCond;
     private StartGUI starter;
+    private World world;
     public long seed;
     private LinkedList<Character> keyBuffer = new LinkedList<>();
     /**
@@ -32,9 +33,11 @@ public class Engine {
     public void interactWithKeyboard() {
         initialGame();
         while (true) {
-            if (StdDraw.hasNextKeyTyped()) {
-                char ch = StdDraw.nextKeyTyped();
-                interactWithChar(ch);
+            while (StdDraw.hasNextKeyTyped()) {
+                keyBuffer.addLast(StdDraw.nextKeyTyped());
+            }
+            if (hasKeyBuffer()) {
+                interactWithChar(nextKey());
             }
         }
     }
@@ -68,7 +71,6 @@ public class Engine {
         //
         // See proj3.byow.InputDemo for a demo of how you can make a nice clean interface
         // that works for many different input types.
-        TETile[][] finalWorldFrame = null;
         initialGame();
         for (Character c : input.toCharArray()) {
             keyBuffer.addLast(c);
@@ -77,7 +79,7 @@ public class Engine {
             char c = nextKey();
             interactWithChar(c);
         }
-        return finalWorldFrame;
+        return world.worldTiles;
     }
 
     /** Helper method to deal with the characters of keyboard input or strings.
@@ -90,17 +92,17 @@ public class Engine {
                 break;
             case ENTERINGSEED:
                 solicitSeed();
-                World world = new World(seed);
+                world = new World(seed);
                 gameCond = WORLD;
                 break;
             case WORLD:
-
+                inputWorldOption(ch);
                 break;
         }
         return null;
     }
 
-    public void inputMenuOption(char ch) {
+    private void inputMenuOption(char ch) {
         switch(ch) {
             case NEWGAME:
                 gameCond = ENTERINGSEED;
@@ -114,8 +116,28 @@ public class Engine {
         }
     }
 
+    private void inputWorldOption(char ch) {
+        switch(ch) {
+            case MOVEUP:
+                world.avatar.move(Unit.UP);
+                break;
+            case MOVELEFT:
+                world.avatar.move(Unit.LEFT);
+                break;
+            case MOVEDOWN:
+                world.avatar.move(Unit.DOWN);
+                break;
+            case MOVERIGHT:
+                world.avatar.move(Unit.RIGHT);
+                break;
+            case EXITCOMMAND:
+                break;
+        }
+    }
+
     /** Solicit a seed */
     private void solicitSeed() {
+        // TODO: add a GUI for entering seed.
         String seedString = "";
         char ch;
         while (true) {
@@ -149,5 +171,10 @@ public class Engine {
 
     private char nextKey() {
         return keyBuffer.removeFirst();
+    }
+
+    @Override
+    public String toString() {
+        return TETile.toString(world.worldTiles);
     }
 }
