@@ -2,6 +2,7 @@ package byow.Core;
 
 import byow.TileEngine.TERenderer;
 import byow.TileEngine.TETile;
+import static byow.Core.Shortcuts.*;
 import edu.princeton.cs.introcs.StdDraw;
 
 import java.awt.*;
@@ -15,10 +16,14 @@ public class Engine {
     public static final int HEIGHT = 30;
     /* The game Conditions */
     private static final int MENU = 1;
-    private static final int WORLD = 2;
+    private static final int ENTERINGSEED = 2;
+    private static final int WORLD = 3;
+
+
     /** Current game condition */
     public int gameCond;
     private StartGUI starter;
+    public long seed;
     private LinkedList<Character> keyBuffer = new LinkedList<>();
     /**
      * Method used for exploring a fresh world. This method should handle all inputs,
@@ -26,11 +31,12 @@ public class Engine {
      */
     public void interactWithKeyboard() {
         initialGame();
-        while (StdDraw.hasNextKeyTyped()) {
-            char ch = StdDraw.nextKeyTyped();
-            interactWithChar(ch);
+        while (true) {
+            if (StdDraw.hasNextKeyTyped()) {
+                char ch = StdDraw.nextKeyTyped();
+                interactWithChar(ch);
+            }
         }
-
     }
 
     /**
@@ -74,18 +80,56 @@ public class Engine {
         return finalWorldFrame;
     }
 
-    /** Helper method to deal with the characters of keyboard input or strings */
+    /** Helper method to deal with the characters of keyboard input or strings.
+     *  The character will be changed to upper case. */
     private TETile[][] interactWithChar(char ch) {
         ch = Character.toUpperCase(ch);
         switch(gameCond) {
             case MENU:
-                starter.inputOption(ch);
+                inputMenuOption(ch);
+                break;
+            case ENTERINGSEED:
+                solicitSeed();
+                World world = new World(seed);
+                gameCond = WORLD;
                 break;
             case WORLD:
 
                 break;
         }
         return null;
+    }
+
+    public void inputMenuOption(char ch) {
+        switch(ch) {
+            case NEWGAME:
+                gameCond = ENTERINGSEED;
+                break;
+            case LOADGAME:
+                // TODO
+                break;
+            case QUIT:
+                // TODO
+                break;
+        }
+    }
+
+    /** Solicit a seed */
+    private void solicitSeed() {
+        String seedString = "";
+        char ch;
+        while (true) {
+            if (hasKeyBuffer()) {
+                ch = nextKey();
+                if (ch == ENDOFSEED) {
+                    seed = Long.parseLong(seedString);
+                    return;
+                }
+                seedString += ch;
+            }
+
+        }
+
     }
 
     /** Initialize the game, set some variables and prepare the canvas */

@@ -20,6 +20,7 @@ public class World implements Serializable {
     public static final int MINROOMSIZE = 4;
     public static final int MAXROOMSIZE = 12;
     public World(long seed) {
+        // Initialize the variables.
         rand = new Random(seed);
         rooms = new HashSet<>();
         worldTiles = new TETile[Engine.WIDTH][Engine.HEIGHT];
@@ -29,9 +30,8 @@ public class World implements Serializable {
             }
         }
         createWorld();
-        StdDraw.clear(StdDraw.BLACK);
         renderWorld();
-        StdDraw.pause(1000000);
+        StdDraw.pause(1000000); // TODO: delete this after finishing.
     }
 
 
@@ -39,6 +39,7 @@ public class World implements Serializable {
     private void createWorld() {
         generateRooms();
         createHallways();
+        addLockedDoor();
     }
 
     private void generateRooms() {
@@ -90,6 +91,7 @@ public class World implements Serializable {
         }
     }
     private void renderWorld() {
+        StdDraw.clear(StdDraw.BLACK);
         ter.renderFrame(worldTiles);
     }
 
@@ -345,5 +347,23 @@ public class World implements Serializable {
                 return new Pos(pos.x, pos.y - 1);
         }
         return null;
+    }
+
+    private void addLockedDoor() {
+        // traverse all room to get non-edge walls
+        LinkedList<Pos> nonEdgeWalls = new LinkedList<>();
+        for (Room room : rooms) {
+            for (Pos wall : room.getWalls()) {
+                // the object place should be a non-edge wall
+                if (!room.isEdgeWall(wall) && worldTiles[wall.x][wall.y].equals(Tileset.WALL)) {
+                    nonEdgeWalls.addLast(wall);
+                }
+            }
+        }
+        // randomly choose a non-edge wall to be a locked door.
+        int properWallNum = nonEdgeWalls.size();
+        Pos[] properWalls = nonEdgeWalls.toArray(new Pos[0]);
+        Pos lockDoorPos = properWalls[rand.nextInt(properWallNum)];
+        worldTiles[lockDoorPos.x][lockDoorPos.y] = Tileset.LOCKED_DOOR;
     }
 }
