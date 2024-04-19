@@ -2,11 +2,10 @@ package byow.Core;
 
 import byow.TileEngine.TERenderer;
 import byow.TileEngine.TETile;
-import static byow.Core.Shortcuts.*;
+import static byow.Core.RandomUtils.*;
 import edu.princeton.cs.introcs.StdDraw;
 
 import java.awt.*;
-import java.util.LinkedList;
 
 public class Engine {
     TERenderer ter = new TERenderer();
@@ -18,6 +17,9 @@ public class Engine {
     private static final int MENU = 1;
     private static final int ENTERINGSEED = 2;
     private static final int WORLD = 3;
+    private static final int ENTERINGCOMMAND = 9;
+    private static final int TILESIZE = 16;
+    private static final int UIHEIGHT = 3;
 
 
     /** Current game condition */
@@ -33,8 +35,11 @@ public class Engine {
     public void interactWithKeyboard() {
         initialGame();
         while (true) {
-            while (StdDraw.hasNextKeyTyped()) {
+            if (StdDraw.hasNextKeyTyped()) {
                 interactWithChar(StdDraw.nextKeyTyped());
+            }
+            if (gameCond == WORLD) {
+                renderWorldUI();
             }
         }
     }
@@ -84,11 +89,12 @@ public class Engine {
                 inputMenuOption(ch);
                 break;
             case ENTERINGSEED: // TODO: add a GUI for entering seed.
-                if (ch == ENDOFSEED) {
+                if (ch == Shortcuts.ENDOFSEED) {
                     seed = Long.parseLong(buffer);
                     buffer = "";
                     world = new World(seed);
                     gameCond = WORLD;
+                    //renderWorldUI();
                 } else {
                     buffer += ch;
                 }
@@ -96,19 +102,25 @@ public class Engine {
             case WORLD:
                 inputWorldOption(ch);
                 break;
+            case ENTERINGCOMMAND:
+                if (ch == 'Q') {
+                    System.exit(0);
+                } else {
+                    gameCond = WORLD;
+                }
         }
         return null;
     }
 
     private void inputMenuOption(char ch) {
         switch(ch) {
-            case NEWGAME:
+            case Shortcuts.NEWGAME:
                 gameCond = ENTERINGSEED;
                 break;
-            case LOADGAME:
+            case Shortcuts.LOADGAME:
                 // TODO
                 break;
-            case QUIT:
+            case Shortcuts.QUIT:
                 // TODO
                 break;
         }
@@ -116,34 +128,71 @@ public class Engine {
 
     private void inputWorldOption(char ch) {
         switch(ch) {
-            case MOVEUP:
+            case Shortcuts.MOVEUP:
                 world.avatar.move(Unit.UP);
                 break;
-            case MOVELEFT:
+            case Shortcuts.MOVELEFT:
                 world.avatar.move(Unit.LEFT);
                 break;
-            case MOVEDOWN:
+            case Shortcuts.MOVEDOWN:
                 world.avatar.move(Unit.DOWN);
                 break;
-            case MOVERIGHT:
+            case Shortcuts.MOVERIGHT:
                 world.avatar.move(Unit.RIGHT);
                 break;
-            case EXITCOMMAND:
+            case Shortcuts.EXITCOMMAND:
+                gameCond = ENTERINGCOMMAND;
                 break;
+
         }
     }
 
     /** Initialize the game, set some variables and prepare the canvas */
     private void initialGame() {
-        StdDraw.setCanvasSize(WIDTH * 16, HEIGHT * 16);
-        StdDraw.setXscale(0, WIDTH);
-        StdDraw.setYscale(0, HEIGHT);
-        StdDraw.clear(Color.BLACK);
-        StdDraw.enableDoubleBuffering();
+//        StdDraw.setCanvasSize(WIDTH * 16, HEIGHT * 16);
+//        StdDraw.setXscale(0, WIDTH);
+//        StdDraw.setYscale(0, HEIGHT);
+//        StdDraw.clear(Color.BLACK);
+//        StdDraw.enableDoubleBuffering();
+        ter.initialize(WIDTH, HEIGHT + UIHEIGHT);
         starter = new StartGUI();
         gameCond = MENU;
     }
 
+    private void renderWorldUI() {
+        StdDraw.clear(StdDraw.BLACK);
+        Pos mousePos = getMousePosition();
+        StdDraw.setFont(new Font("Monaco", Font.BOLD, TILESIZE - 1));
+        ter.renderFrame(world.worldTiles);
+        if (mouseInTiles(mousePos)) {
+            renderUI(mousePos);
+        }
+        StdDraw.show();
+    }
+
+    private void renderUI(Pos mousePos) {
+        StdDraw.setFont(new Font("Monaco", Font.BOLD, 16));
+        StdDraw.setPenColor(StdDraw.WHITE);
+        StdDraw.textLeft(3, HEIGHT + UIHEIGHT - 1, getMouseInfo(mousePos));
+    }
+
+    public Pos getMousePosition() {
+        return new Pos((int) Math.floor(StdDraw.mouseX()), (int) Math.floor(StdDraw.mouseY()));
+    }
+
+    /** Get the info of the tile which is pointed by the mouse. */
+    private String getMouseInfo(Pos pos) {
+        return world.worldTiles[pos.x][pos.y].description();
+    }
+
+    private boolean mouseInTiles(Pos pos) {
+        double mousex = pos.x;
+        double mousey = pos.y;
+        if (mousex >= 0 && mousex < WIDTH && mousey >= 0 && mousey < HEIGHT) {
+            return true;
+        }
+        return false;
+    }
     @Override
     public String toString() {
         return TETile.toString(world.worldTiles);
