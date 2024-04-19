@@ -25,7 +25,7 @@ public class Engine {
     private StartGUI starter;
     private World world;
     public long seed;
-    private LinkedList<Character> keyBuffer = new LinkedList<>();
+    public String buffer = "";
     /**
      * Method used for exploring a fresh world. This method should handle all inputs,
      * including inputs from the main menu.
@@ -34,10 +34,7 @@ public class Engine {
         initialGame();
         while (true) {
             while (StdDraw.hasNextKeyTyped()) {
-                keyBuffer.addLast(StdDraw.nextKeyTyped());
-            }
-            if (hasKeyBuffer()) {
-                interactWithChar(nextKey());
+                interactWithChar(StdDraw.nextKeyTyped());
             }
         }
     }
@@ -73,10 +70,6 @@ public class Engine {
         // that works for many different input types.
         initialGame();
         for (Character c : input.toCharArray()) {
-            keyBuffer.addLast(c);
-        }
-        while (hasKeyBuffer()) {
-            char c = nextKey();
             interactWithChar(c);
         }
         return world.worldTiles;
@@ -90,10 +83,15 @@ public class Engine {
             case MENU:
                 inputMenuOption(ch);
                 break;
-            case ENTERINGSEED:
-                solicitSeed();
-                world = new World(seed);
-                gameCond = WORLD;
+            case ENTERINGSEED: // TODO: add a GUI for entering seed.
+                if (ch == ENDOFSEED) {
+                    seed = Long.parseLong(buffer);
+                    buffer = "";
+                    world = new World(seed);
+                    gameCond = WORLD;
+                } else {
+                    buffer += ch;
+                }
                 break;
             case WORLD:
                 inputWorldOption(ch);
@@ -135,25 +133,6 @@ public class Engine {
         }
     }
 
-    /** Solicit a seed */
-    private void solicitSeed() {
-        // TODO: add a GUI for entering seed.
-        String seedString = "";
-        char ch;
-        while (true) {
-            if (hasKeyBuffer()) {
-                ch = nextKey();
-                if (ch == ENDOFSEED) {
-                    seed = Long.parseLong(seedString);
-                    return;
-                }
-                seedString += ch;
-            }
-
-        }
-
-    }
-
     /** Initialize the game, set some variables and prepare the canvas */
     private void initialGame() {
         StdDraw.setCanvasSize(WIDTH * 16, HEIGHT * 16);
@@ -163,14 +142,6 @@ public class Engine {
         StdDraw.enableDoubleBuffering();
         starter = new StartGUI();
         gameCond = MENU;
-    }
-
-    private boolean hasKeyBuffer() {
-        return !keyBuffer.isEmpty();
-    }
-
-    private char nextKey() {
-        return keyBuffer.removeFirst();
     }
 
     @Override
