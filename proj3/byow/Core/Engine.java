@@ -2,10 +2,11 @@ package byow.Core;
 
 import byow.TileEngine.TERenderer;
 import byow.TileEngine.TETile;
-import static byow.Core.RandomUtils.*;
+import static byow.Core.Utils.*;
 import edu.princeton.cs.introcs.StdDraw;
 
 import java.awt.*;
+import java.io.File;
 
 public class Engine {
     TERenderer ter = new TERenderer();
@@ -20,7 +21,7 @@ public class Engine {
     private static final int ENTERINGCOMMAND = 9;
     private static final int TILESIZE = 16;
     private static final int UIHEIGHT = 3;
-
+    private static final File SAVEFILE = new File("save1.txt");
 
     /** Current game condition */
     public int gameCond;
@@ -66,7 +67,6 @@ public class Engine {
      * @return the 2D TETile[][] representing the state of the world
      */
     public TETile[][] interactWithInputString(String input) {
-        // TODO: Fill out this method so that it run the engine using the input
         // passed in as an argument, and return a 2D tile representation of the
         // world that would have been drawn if the same inputs had been given
         // to interactWithKeyboard().
@@ -82,7 +82,7 @@ public class Engine {
 
     /** Helper method to deal with the characters of keyboard input or strings.
      *  The character will be changed to upper case. */
-    private TETile[][] interactWithChar(char ch) {
+    private void interactWithChar(char ch) {
         ch = Character.toUpperCase(ch);
         switch(gameCond) {
             case MENU:
@@ -104,12 +104,12 @@ public class Engine {
                 break;
             case ENTERINGCOMMAND:
                 if (ch == 'Q') {
+                    saveWorld();
                     System.exit(0);
                 } else {
                     gameCond = WORLD;
                 }
         }
-        return null;
     }
 
     private void inputMenuOption(char ch) {
@@ -118,10 +118,11 @@ public class Engine {
                 gameCond = ENTERINGSEED;
                 break;
             case Shortcuts.LOADGAME:
-                // TODO
+                loadWorld();
+                gameCond = WORLD;
                 break;
             case Shortcuts.QUIT:
-                // TODO
+                System.exit(0);
                 break;
         }
     }
@@ -192,6 +193,25 @@ public class Engine {
             return true;
         }
         return false;
+    }
+
+    /** Save the current world */
+    public void saveWorld() {
+        if (!SAVEFILE.exists()) {
+            safetyCreate(SAVEFILE);
+        }
+        writeObject(SAVEFILE, world);
+    }
+
+    /** Load a saved world and change game condition to WORLD */
+    public void loadWorld() {
+        if (!SAVEFILE.exists()) {
+            // TODO: add a message to tell there are no saving.
+            return;
+        }
+        world = readObject(SAVEFILE, World.class);
+        world.ter = new TERenderer();
+        gameCond = WORLD;
     }
     @Override
     public String toString() {

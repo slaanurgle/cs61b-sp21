@@ -2,9 +2,13 @@ package byow.Core;
 
 import byow.TileEngine.TETile;
 import byow.TileEngine.Tileset;
+
+import java.io.Serializable;
+
+import static byow.Core.Utils.*;
 import static byow.Core.RandomUtils.*;
 
-public class Unit {
+public class Unit implements Serializable {
     public int posx;
     public int posy;
     public World world;
@@ -30,7 +34,7 @@ public class Unit {
         TETile[][] tiles = world.worldTiles;
         Pos nextPos = nextTile(new Pos(posx, posy), dir);
         // move only if the next tile is FLOOR
-        if (tiles[nextPos.x][nextPos.y].equals(Tileset.FLOOR)) {
+        if (world.worldTiles[nextPos.x][nextPos.y].sameType(Tileset.FLOOR)) {
             tiles[posx][posy] = Tileset.FLOOR;
             posx = nextPos.x;
             posy = nextPos.y;

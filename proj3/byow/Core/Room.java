@@ -4,7 +4,7 @@ import byow.TileEngine.Tileset;
 
 import java.util.*;
 
-import static byow.Core.RandomUtils.Pos;
+import static byow.Core.Utils.*;
 public class Room {
 
     // A room is at least 3 tiles of width and height, walls are included in a room.

@@ -9,9 +9,10 @@ import java.io.Serializable;
 import java.util.*;
 
 import static byow.Core.RandomUtils.*;
+import static byow.Core.Utils.*;
 
 public class World implements Serializable {
-    public TERenderer ter = new TERenderer();
+    public transient TERenderer ter = new TERenderer();
     public Random rand;
     public TETile[][] worldTiles;
     public Unit avatar;
@@ -113,7 +114,7 @@ public class World implements Serializable {
         for (int i = 1; i <= xmax; i += 1) {
             for (int j = 1; j <= ymax; j += 1) {
                 TETile tile = worldTiles[i][j];
-                if (tile.equals(Tileset.NOTHING)) {
+                if (tile.sameType(Tileset.NOTHING)) {
                     generateHallway(i, j);
                 }
             }
@@ -139,14 +140,14 @@ public class World implements Serializable {
     private boolean isValidHallway(Pos p) {
         TETile tile = posToTile(p);
         // The tile should be Tileset.NOTHING
-        if (!tile.equals(Tileset.NOTHING)) {
+        if (!tile.sameType(Tileset.NOTHING)) {
             return false;
         }
         // The tile
         int cnt = 0;
         for (Pos adj : getAdjacent(p)) {
             TETile adjTile = posToTile(adj);
-            if (adjTile.equals(Tileset.FLOOR)) {
+            if (adjTile.sameType(Tileset.FLOOR)) {
                 cnt += 1;
             }
         }
@@ -159,7 +160,7 @@ public class World implements Serializable {
         for (int i = 0; i < Engine.WIDTH; i += 1) {
             for (int j = 0; j < Engine.HEIGHT; j += 1) {
                 TETile tile = worldTiles[i][j];
-                if (tile.equals(Tileset.FLOOR)) {
+                if (tile.sameType(Tileset.FLOOR)) {
                     floorTiles.addLast(new Pos(i, j));
                 }
             }
@@ -185,7 +186,7 @@ public class World implements Serializable {
         fringe.push(startPos);
         while (!fringe.empty()) {
             Pos currPos = fringe.pop();
-            if (worldTiles[currPos.x][currPos.y].equals(Tileset.WALL)) {
+            if (worldTiles[currPos.x][currPos.y].sameType(Tileset.WALL)) {
                 continue;
             }
             worldTiles[currPos.x][currPos.y] = Tileset.FLOOR;
@@ -258,10 +259,10 @@ public class World implements Serializable {
     private void removeRedundantWall() {
         for (int i = 0; i < Engine.WIDTH; i += 1) {
             for (int j = 0; j < Engine.HEIGHT; j += 1) {
-                if (worldTiles[i][j].equals(Tileset.WALL)) {
+                if (worldTiles[i][j].sameType(Tileset.WALL)) {
                     boolean redundant = true;
                     for (Pos adjPos : getAdjacent(new Pos(i, j))) {
-                        if (worldTiles[adjPos.x][adjPos.y].equals(Tileset.FLOOR)) {
+                        if (worldTiles[adjPos.x][adjPos.y].sameType(Tileset.FLOOR)) {
                             redundant = false;
                             break;
                         }
@@ -275,12 +276,12 @@ public class World implements Serializable {
     }
 
     private boolean isDeadEnd(Pos pos) {
-        if (!worldTiles[pos.x][pos.y].equals(Tileset.FLOOR)) {
+        if (!worldTiles[pos.x][pos.y].sameType(Tileset.FLOOR)) {
             return false;
         }
         int floorNum = 0;
         for (Pos adj : getAdjacent(pos)) {
-            if (worldTiles[adj.x][adj.y].equals(Tileset.FLOOR)) {
+            if (worldTiles[adj.x][adj.y].sameType(Tileset.FLOOR)) {
                 floorNum += 1;
             }
         }
@@ -298,7 +299,7 @@ public class World implements Serializable {
                 }
                 int adjNum = 0;
                 for (Pos adjPos : getAdjacent(pos)) {
-                    if (worldTiles[adjPos.x][adjPos.y].equals(Tileset.FLOOR)) {
+                    if (worldTiles[adjPos.x][adjPos.y].sameType(Tileset.FLOOR)) {
                         adjNum += 1;
                     }
                 }
@@ -338,7 +339,7 @@ public class World implements Serializable {
             worldTiles[x][y] = Tileset.FLOOR;
             int cnt = 0;
             for (Pos adjPos : getAdjacent(currPos)) {
-                if (worldTiles[adjPos.x][adjPos.y].equals(Tileset.FLOOR)) {
+                if (worldTiles[adjPos.x][adjPos.y].sameType(Tileset.FLOOR)) {
                     cnt += 1;
                 }
             }
@@ -370,7 +371,7 @@ public class World implements Serializable {
         for (Room room : rooms) {
             for (Pos wall : room.getWalls()) {
                 // the object place should be a non-edge wall
-                if (!room.isEdgeWall(wall) && worldTiles[wall.x][wall.y].equals(Tileset.WALL)) {
+                if (!room.isEdgeWall(wall) && worldTiles[wall.x][wall.y].sameType(Tileset.WALL)) {
                     nonEdgeWalls.addLast(wall);
                 }
             }
