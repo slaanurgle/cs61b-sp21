@@ -16,11 +16,13 @@ public class World implements Serializable {
     public Random rand;
     public TETile[][] worldTiles;
     public Unit avatar;
+    public Unit monster;
     public transient HashSet<Room> rooms;
     public static final int ROOMNUM = 20;
     public static final int DOORNUM = 2;
     public static final int MINROOMSIZE = 4;
     public static final int MAXROOMSIZE = 12;
+    public static final double DEADENDRATIO = 1;
     public World(long seed) {
         // Initialize the variables.
         rand = new Random(seed);
@@ -33,6 +35,7 @@ public class World implements Serializable {
         }
         createWorld();
         avatar = new Unit(this);
+        // monster = new Unit(this);
         renderWorld();
 
     }
@@ -54,7 +57,6 @@ public class World implements Serializable {
 
     /** Create a random valid room object and add it to rooms */
     private Room generateRandomRoom() {
-        // TODO: check whether it is needed to use other contribution
         boolean roomValid;
         Room newRoom;
         do {
@@ -236,12 +238,11 @@ public class World implements Serializable {
 
     /** Remove the dead end from worldTiles[X][Y], the start tile should be dead end */
     private void removeDeadEnd(int x, int y) {
-        // TODO: use random to delete only some of the dead ends.
         Pos currPos = new Pos(x, y);
         // when remove dead end, remove redundant walls
         worldTiles[x][y] = Tileset.WALL;
         for (Pos adjPos : getAdjacent(currPos)) {
-            if (isDeadEnd(adjPos)) {
+            if (isDeadEnd(adjPos) && uniform(rand, 0, 1.0) < DEADENDRATIO) {
                 removeDeadEnd(adjPos.x, adjPos.y);
             }
         }

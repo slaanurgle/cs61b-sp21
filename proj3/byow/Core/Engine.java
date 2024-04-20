@@ -12,6 +12,7 @@ public class Engine {
     TERenderer ter = new TERenderer();
     /* Feel free to change the width and height. */
     public static final String GAMENAME = "CS61B: THE GAME";
+    public static final String NOSAVEANNOUCE = "There are no game save!";
     public static final int WIDTH = 80;
     public static final int HEIGHT = 30;
     /* The game Conditions */
@@ -88,7 +89,7 @@ public class Engine {
             case MENU:
                 inputMenuOption(ch);
                 break;
-            case ENTERINGSEED: // TODO: add a GUI for entering seed.
+            case ENTERINGSEED:
                 if (ch == Shortcuts.ENDOFSEED) {
                     seed = Long.parseLong(buffer);
                     buffer = "";
@@ -119,7 +120,6 @@ public class Engine {
                 break;
             case Shortcuts.LOADGAME:
                 loadWorld();
-                gameCond = WORLD;
                 break;
             case Shortcuts.QUIT:
                 System.exit(0);
@@ -206,7 +206,13 @@ public class Engine {
     /** Load a saved world and change game condition to WORLD */
     public void loadWorld() {
         if (!SAVEFILE.exists()) {
-            // TODO: add a message to tell there are no saving.
+            StdDraw.clear(StdDraw.BLACK);
+            StdDraw.setFont(new Font("Monaco", Font.BOLD, 16));
+            StdDraw.setPenColor(StdDraw.WHITE);
+            StdDraw.text(WIDTH / 2, (HEIGHT + UIHEIGHT) / 2, NOSAVEANNOUCE);
+            StdDraw.show();
+            StdDraw.pause(2000);
+            starter = new StartGUI();
             return;
         }
         world = readObject(SAVEFILE, World.class);
